@@ -1222,6 +1222,7 @@ LatexCmds['≥'] =
   LatexCmds.geq =
     () => new Inequality(greater, false);
 LatexCmds.infty =
+  LatexCmds.inf = //MODIFIED LINE !!!!
   LatexCmds.infin =
   LatexCmds.infinity =
     bindVanillaSymbol('\\infty ', '&infin;', 'infinity');

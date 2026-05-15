@@ -406,6 +406,34 @@
     }
   }
 
+  // MODIFICATIONS START !!!!
+
+  .mq-lim-operator {
+    vertical-align: -.2em;
+    padding: .2em;
+    text-align: center;
+
+    .mq-lim-symbol {
+      display: block;
+      font-size: 150%;        
+      font-style: normal;     
+      font-family: Symbola, "Times New Roman", serif;
+    }
+
+    .mq-from, big, .mq-to  {
+      display: block;
+    }
+    .mq-from, .mq-to  {
+      font-size: 80%;
+    }
+    .mq-from {
+      float: right; /* take out of normal flow to manipulate baseline */
+      width: 100%;
+      margin-top: -.3em; 
+    }
+  }
+
+  // MODIFICATIONS END !!!!
 
   &, .mq-editable-field {
     cursor: text;
