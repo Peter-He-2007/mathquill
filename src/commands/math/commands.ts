@@ -1657,6 +1657,218 @@ LatexCmds.choose = class extends Binomial {
   }
 };
 
+//MODIFICATIONS START !!!!
+
+//TODO: create matrix command...
+
+// TODO: fix Failed to load resource: the server responded with a status of 404 (Not Found): favicon.ico:1 ...
+class Vector extends DelimsNode {
+  ctrlSeq = '\\vect';
+  ariaLabel = 'vector';
+  textTemplate = ['[', ',', ']'];
+
+  // ── tell MathQuill how many blocks we have ──────────────────────────────
+  // instead of reading from DOMView, we read from our actual blocks array
+  numBlocks() {
+    return this.blocks ? this.blocks.length : 2;
+  }
+
+  // ── create the initial blocks manually ──────────────────────────────────
+  // normally MathCommand.createBlocks() uses numBlocks() from DOMView
+  // we override it to create 2 blocks to start
+  createBlocks() {
+    this.blocks = [];
+    for (var i = 0; i < 2; i++) {
+      var block = new MathBlock();
+      block.adopt(this, this.getEnd(R), 0);
+      this.blocks.push(block);
+    }
+  }
+
+  // ── build the DOM from scratch ───────────────────────────────────────────
+  // instead of DOMView's render function, we build the HTML directly
+  // this gets called once when the node is first inserted
+  html() {
+    var leftSymbol = SVG_SYMBOLS['['];
+    var rightSymbol = SVG_SYMBOLS[']'];
+
+    // build a row span for each block
+    var rows = this.blocks!.map((block) =>
+      h.block('span', { class: 'mq-vector-row' }, block)
+    );
+
+    // build the full DOM structure
+    var el = h('span', { class: 'mq-non-leaf mq-bracket-container' }, [
+      h(
+        'span',
+        {
+          style: 'width:' + leftSymbol.width,
+          class: 'mq-paren mq-bracket-l mq-scaled',
+        },
+        [leftSymbol.html()]
+      ),
+
+      h(
+        'span',
+        {
+          style:
+            'margin-left:' +
+            leftSymbol.width +
+            ';margin-right:' +
+            rightSymbol.width,
+          class: 'mq-non-leaf mq-bracket-middle',
+        },
+        [h('span', { class: 'mq-array mq-non-leaf' }, rows)]
+      ),
+
+      h(
+        'span',
+        {
+          style: 'width:' + rightSymbol.width,
+          class: 'mq-paren mq-bracket-r mq-scaled',
+        },
+        [rightSymbol.html()]
+      ),
+    ]);
+
+    // link this DOM element back to this node so MathQuill can find it
+    this.setDOM(el);
+    NodeBase.linkElementByCmdNode(el, this);
+    return el;
+  }
+
+  // ── add a new row ────────────────────────────────────────────────────────
+  // called when user presses Tab on the last row
+  addRow(cursor: Cursor, index: number) {
+    var newBlock = new MathBlock();
+    newBlock.adopt(this, this.blocks![index], this.blocks![index + 1] || 0);
+    this.blocks!.splice(index + 1, 0, newBlock);
+
+    // wire up keyboard BEFORE moving cursor into it
+    this.wireBlock(newBlock);
+
+    var newRow = h.block('span', { class: 'mq-vector-row' }, newBlock);
+    var arrayEl = this.domFrag().oneElement().querySelector('.mq-array');
+    var existingRows = arrayEl!.children;
+    arrayEl!.insertBefore(newRow, existingRows[index + 1] || null);
+
+    cursor.insAtRightEnd(newBlock);
+
+    this.bubble(function (node) {
+      node.reflow();
+      return undefined;
+    });
+  }
+
+  // ── remove a row ─────────────────────────────────────────────────────────
+  // called when user presses Backspace on an empty row
+  // TODO: fix this, it doesn't work...
+  removeRow(block: MathBlock, cursor: Cursor) {
+    // don't remove if it's the last row
+    if (this.blocks!.length <= 1) {
+      console.log('last block should be deleted');
+      //cursor.insLeftOf(this);
+      this.blocks = [];
+      block.domFrag().oneElement().parentElement!.remove();
+      block.disown();
+      this.remove();
+      this.deleteOutOf(L, cursor);
+      //this.setEnds({ [L]: 0, [R]: 0 });
+      return;
+    }
+
+    var index = this.blocks!.indexOf(block);
+    this.blocks!.splice(index, 1);
+
+    // move cursor to the row above, or below if it was the first row
+    var targetBlock = this.blocks![Math.max(0, index - 1)];
+    cursor.insAtRightEnd(targetBlock);
+
+    // remove from DOM
+    block.domFrag().oneElement().remove();
+
+    block.disown();
+
+    this.bubble(function (node) {
+      node.reflow();
+      return undefined;
+    });
+  }
+
+  latex() {
+    if (!this.blocks || this.blocks.length === 0) return '';
+    return (
+      this.ctrlSeq +
+      this.blocks!.map(function (block) {
+        return '{' + (block.latex() || ' ') + '}';
+      }).join('')
+    );
+  }
+
+  wireBlock(block: MathBlock) {
+    var self = this;
+
+    block.keystroke = function (
+      key: string,
+      e: KeyboardEvent,
+      ctrlr: Controller
+    ) {
+      var cursor = ctrlr.cursor;
+
+      if (key === 'Enter') {
+        e.preventDefault();
+        // always read index fresh from blocks array
+        var currentIndex = self.blocks!.indexOf(block);
+        self.addRow(cursor, currentIndex); //TODO: add the new block at the position of the curson instead of the end of the linkedlist.
+        return;
+      }
+
+      if (key === 'Backspace' && block.isEmpty()) {
+        e.preventDefault();
+        var currentIndex = self.blocks!.indexOf(block);
+        if (self.blocks!.length <= 1) {
+          cursor.insRightOf(self);
+          cursor.controller.keystroke('Backspace', e);
+        } else {
+          self.removeRow(block, cursor);
+        }
+        return;
+      }
+
+      if (key === 'Up') {
+        var currentIndex = self.blocks!.indexOf(block);
+        if (currentIndex > 0) {
+          cursor.insAtRightEnd(self.blocks![currentIndex - 1]);
+          return;
+        }
+      }
+
+      if (key === 'Down') {
+        var currentIndex = self.blocks!.indexOf(block);
+        if (currentIndex < self.blocks!.length - 1) {
+          cursor.insAtRightEnd(self.blocks![currentIndex + 1]);
+          return;
+        }
+      }
+
+      return MathBlock.prototype.keystroke.call(this, key, e, ctrlr);
+    };
+  }
+
+  // ── wire up keyboard navigation ──────────────────────────────────────────
+  finalizeTree() {
+    console.log('finalize tree called'); //debug...
+    var self = this;
+    this.blocks!.forEach(function (block) {
+      self.wireBlock(block);
+    });
+  }
+}
+
+LatexCmds.vect = LatexCmds.vector = Vector;
+
+//MODIFICATIONS END !!!!
+
 class MathFieldNode extends MathCommand {
   name: string;
   ctrlSeq = '\\MathQuillMathField';
