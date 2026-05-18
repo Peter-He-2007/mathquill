@@ -1830,6 +1830,16 @@ class Vector extends DelimsNode {
     };
   }
 
+  latex() {
+    var rows: string[] = [];
+
+    for (var i = 0; i < this.blocks!.length; i++) {
+      rows.push(this.blocks![i].latex());
+    }
+
+    return '\\begin{bmatrix} ' + rows.join(' \\\\ ') + ' \\end{bmatrix}';
+  }
+
   // ── wire up keyboard navigation ──────────────────────────────────────────
   finalizeTree() {
     var self = this;
@@ -2281,6 +2291,30 @@ class Matrix extends Vector {
       node.reflow();
       return undefined;
     });
+  }
+
+  latex() {
+    var self = this;
+    var rowCount = this.matrixBlocks[0].length;
+    var colCount = this.matrixBlocks.length;
+
+    var rows: string[] = [];
+
+    // iterate row by row
+    for (var row = 0; row < rowCount; row++) {
+      var cols: string[] = [];
+
+      // iterate column by column within each row
+      for (var col = 0; col < colCount; col++) {
+        cols.push(self.matrixBlocks[col][row].latex());
+      }
+
+      // join columns with &
+      rows.push(cols.join(' & '));
+    }
+
+    // join rows with \\
+    return '\\begin{bmatrix} ' + rows.join(' \\\\ ') + ' \\end{bmatrix}';
   }
 }
 
