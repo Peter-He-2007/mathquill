@@ -2318,7 +2318,168 @@ class Matrix extends Vector {
   }
 }
 
+class Pmatrix extends Matrix {
+  html() {
+    var leftSymbol = SVG_SYMBOLS['('];
+    var rightSymbol = SVG_SYMBOLS[')'];
+
+    // build each column span from matrixBlocks
+    var colSpans = this.matrixBlocks.map(function (col) {
+      var rowSpans = col.map(function (block) {
+        return h.block('span', { class: 'mq-matrix-row' }, block);
+      });
+      return h('span', { class: 'mq-matrix-col' }, rowSpans);
+    });
+
+    var el = h('span', { class: 'mq-non-leaf mq-bracket-container' }, [
+      h(
+        'span',
+        {
+          style: 'width:' + leftSymbol.width,
+          class: 'mq-paren mq-bracket-l mq-scaled',
+        },
+        [leftSymbol.html()]
+      ),
+
+      h(
+        'span',
+        {
+          style:
+            'margin-left:' +
+            leftSymbol.width +
+            ';margin-right:' +
+            rightSymbol.width,
+          class: 'mq-non-leaf mq-bracket-middle',
+        },
+        [h('span', { class: 'mq-matrix-grid' }, colSpans)]
+      ),
+
+      h(
+        'span',
+        {
+          style: 'width:' + rightSymbol.width,
+          class: 'mq-paren mq-bracket-r mq-scaled',
+        },
+        [rightSymbol.html()]
+      ),
+    ]);
+
+    this.setDOM(el);
+    NodeBase.linkElementByCmdNode(el, this);
+    return el;
+  }
+
+  latex() {
+    var self = this;
+    var rowCount = this.matrixBlocks[0].length;
+    var colCount = this.matrixBlocks.length;
+
+    var rows: string[] = [];
+
+    // iterate row by row
+    for (var row = 0; row < rowCount; row++) {
+      var cols: string[] = [];
+
+      // iterate column by column within each row
+      for (var col = 0; col < colCount; col++) {
+        cols.push(self.matrixBlocks[col][row].latex());
+      }
+
+      // join columns with &
+      rows.push(cols.join(' & '));
+    }
+
+    // join rows with \\
+    return '\\begin{pmatrix} ' + rows.join(' \\\\ ') + ' \\end{pmatrix}';
+  }
+}
+
+class Dmatrix extends Matrix {
+  html() {
+    var leftSymbol = SVG_SYMBOLS['|'];
+    var rightSymbol = SVG_SYMBOLS['|'];
+
+    // build each column span from matrixBlocks
+    var colSpans = this.matrixBlocks.map(function (col) {
+      var rowSpans = col.map(function (block) {
+        return h.block('span', { class: 'mq-matrix-row' }, block);
+      });
+      return h('span', { class: 'mq-matrix-col' }, rowSpans);
+    });
+
+    var el = h('span', { class: 'mq-non-leaf mq-bracket-container' }, [
+      h(
+        'span',
+        {
+          style: 'width:' + leftSymbol.width,
+          class: 'mq-paren mq-bracket-l mq-scaled',
+        },
+        [leftSymbol.html()]
+      ),
+
+      h(
+        'span',
+        {
+          style:
+            'margin-left:' +
+            leftSymbol.width +
+            ';margin-right:' +
+            rightSymbol.width,
+          class: 'mq-non-leaf mq-bracket-middle',
+        },
+        [h('span', { class: 'mq-matrix-grid' }, colSpans)]
+      ),
+
+      h(
+        'span',
+        {
+          style: 'width:' + rightSymbol.width,
+          class: 'mq-paren mq-bracket-r mq-scaled',
+        },
+        [rightSymbol.html()]
+      ),
+    ]);
+
+    this.setDOM(el);
+    NodeBase.linkElementByCmdNode(el, this);
+    return el;
+  }
+
+  latex() {
+    var self = this;
+    var rowCount = this.matrixBlocks[0].length;
+    var colCount = this.matrixBlocks.length;
+
+    var rows: string[] = [];
+
+    // iterate row by row
+    for (var row = 0; row < rowCount; row++) {
+      var cols: string[] = [];
+
+      // iterate column by column within each row
+      for (var col = 0; col < colCount; col++) {
+        cols.push(self.matrixBlocks[col][row].latex());
+      }
+
+      // join columns with &
+      rows.push(cols.join(' & '));
+    }
+
+    // join rows with \\
+    return '\\begin{vmatrix} ' + rows.join(' \\\\ ') + ' \\end{vmatrix}';
+  }
+}
+
 LatexCmds.matrix = LatexCmds.mat = Matrix;
+LatexCmds.bmatrix = LatexCmds.bmat = Matrix;
+LatexCmds.pmatrix = LatexCmds.pmat = Pmatrix;
+LatexCmds.dmatrix =
+  LatexCmds.dmat =
+  LatexCmds.detmat =
+  LatexCmds.detmatrix =
+  LatexCmds.vmat =
+  LatexCmds.vmatrix =
+    Dmatrix;
 
 //MODIFICATIONS END !!!!
 
