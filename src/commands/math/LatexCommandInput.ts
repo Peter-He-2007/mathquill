@@ -1,18 +1,143 @@
-/****************************************
- * Input box to type backslash commands
- ***************************************/
+// ─── SUGGESTION DROPDOWN ─────────────────────────────────────────────────────
+
+var selectedSuggestionIndex: number = -1;
+
+function getSuggestions(partial: string): string[] {
+  if (!partial) return [];
+  var allCommands: string[] = Object.keys(LatexCmds);
+  return allCommands
+    .filter(function (cmd: string) {
+      return cmd.indexOf(partial) === 0;
+    })
+    .slice(0, 7);
+}
+
+function createDropdown(): HTMLElement {
+  var el = document.createElement('div');
+  el.id = 'mq-suggestions';
+  el.style.cssText = [
+    'position:absolute',
+    'background:white',
+    'border:1px solid #ccc',
+    'border-radius:4px',
+    'box-shadow:0 2px 8px rgba(0,0,0,0.15)',
+    'z-index:9999',
+    'max-height:200px',
+    'overflow-y:auto',
+    'font-family:monospace',
+    'font-size:14px',
+    'min-width:160px',
+  ].join(';');
+  document.body.appendChild(el);
+  return el;
+}
+
+function getDropdown(): HTMLElement {
+  return (
+    (document.getElementById('mq-suggestions') as HTMLElement) ||
+    createDropdown()
+  );
+}
+
+function hideSuggestions(): void {
+  var el = document.getElementById('mq-suggestions');
+  if (el) el.remove();
+  selectedSuggestionIndex = -1;
+}
+
+function updateSuggestionHighlight(): void {
+  var dropdown = document.getElementById('mq-suggestions');
+  if (!dropdown) return;
+  var items = dropdown.children;
+  for (var i = 0; i < items.length; i++) {
+    (items[i] as HTMLElement).style.background =
+      i === selectedSuggestionIndex ? '#e8f0fe' : 'white';
+  }
+}
+
+function moveSuggestionDown(): void {
+  var dropdown = document.getElementById('mq-suggestions');
+  if (!dropdown) return;
+  var count = dropdown.children.length;
+  selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, count - 1);
+  updateSuggestionHighlight();
+}
+
+function moveSuggestionUp(): void {
+  var dropdown = document.getElementById('mq-suggestions');
+  if (!dropdown) return;
+  selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+  updateSuggestionHighlight();
+}
+
+function getSelectedSuggestion(): string | null {
+  var dropdown = document.getElementById('mq-suggestions');
+  if (!dropdown || selectedSuggestionIndex < 0) return null;
+  var item = dropdown.children[selectedSuggestionIndex] as HTMLElement;
+  return item ? item.getAttribute('data-cmd') : null;
+}
+
+function showSuggestions(
+  partial: string,
+  cursor: Cursor,
+  onSelect: (cmd: string) => void
+): void {
+  var suggestions = getSuggestions(partial);
+  selectedSuggestionIndex = -1;
+
+  if (suggestions.length === 0) {
+    hideSuggestions();
+    return;
+  }
+
+  var cursorEl = cursor.domFrag().oneElement();
+  var rect = cursorEl.getBoundingClientRect();
+
+  var dropdown = getDropdown();
+  dropdown.innerHTML = '';
+
+  suggestions.forEach(function (cmd: string, i: number) {
+    var item = document.createElement('div');
+    item.setAttribute('data-cmd', cmd);
+    item.style.cssText = [
+      'padding:6px 12px',
+      'cursor:pointer',
+      'color:#333',
+      'border-bottom:1px solid #f0f0f0',
+    ].join(';');
+    item.textContent = '\\' + cmd;
+
+    item.addEventListener('mouseover', function (): void {
+      selectedSuggestionIndex = i;
+      updateSuggestionHighlight();
+    });
+
+    item.addEventListener('mousedown', function (e: MouseEvent): void {
+      e.preventDefault();
+      onSelect(cmd);
+    });
+
+    dropdown.appendChild(item);
+  });
+
+  dropdown.style.left = rect.left + window.scrollX + 'px';
+  dropdown.style.top = rect.bottom + window.scrollY + 4 + 'px';
+}
+
+// ─── LATEX COMMAND INPUT ─────────────────────────────────────────────────────
 
 CharCmds['\\'] = class LatexCommandInput extends MathCommand {
   ctrlSeq = '\\';
   _replacedFragment?: Fragment;
 
-  replaces(replacedFragment: Fragment) {
+  replaces(replacedFragment: Fragment): void {
     this._replacedFragment = replacedFragment.disown();
-    this.isEmpty = function () {
+    this.isEmpty = function (): boolean {
       return false;
     };
   }
-  domView = new DOMView(1, (blocks) =>
+
+  domView = new DOMView(1, (blocks: MathBlock[]) =>
     h('span', { class: 'mq-latex-command-input-wrapper mq-non-leaf' }, [
       h('span', { class: 'mq-latex-command-input mq-non-leaf' }, [
         h.text('\\'),
@@ -20,46 +145,97 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
       ]),
     ])
   );
+
   textTemplate = ['\\'];
-  createBlocks() {
+
+  createBlocks(): void {
     super.createBlocks();
     const endsL = this.getEnd(L);
 
     endsL.focus = function () {
       this.parent.domFrag().addClass('mq-hasCursor');
       if (this.isEmpty()) this.parent.domFrag().removeClass('mq-empty');
-
       return this;
     };
+
     endsL.blur = function () {
       this.parent.domFrag().removeClass('mq-hasCursor');
       if (this.isEmpty()) this.parent.domFrag().addClass('mq-empty');
-
+      hideSuggestions();
       return this;
     };
-    endsL.write = function (cursor, ch) {
+
+    endsL.write = function (cursor: Cursor, ch: string): void {
       cursor.show().deleteSelection();
 
       if (ch.match(/[a-z]/i)) {
         new VanillaSymbol(ch).createLeftOf(cursor);
-        // TODO needs tests
         cursor.controller.aria.alert(ch);
+
+        var typed: string = (this.parent as LatexCommandInput)
+          .getEnd(L)
+          .latex();
+        var self = this;
+        showSuggestions(typed, cursor, function (cmd: string): void {
+          (self.parent as LatexCommandInput).renderCommand(cursor, cmd);
+        });
       } else {
+        hideSuggestions();
         var cmd = (this.parent as LatexCommandInput).renderCommand(cursor);
-        // TODO needs tests
         cursor.controller.aria.queue(cmd.mathspeak({ createdLeftOf: cursor }));
-        if (ch !== '\\' || !this.isEmpty()) cursor.parent.write(cursor, ch);
-        else cursor.controller.aria.alert();
+        if (ch !== '\\' || !this.isEmpty()) {
+          cursor.parent.write(cursor, ch);
+        } else {
+          cursor.controller.aria.alert();
+        }
       }
     };
 
     var originalKeystroke = endsL.keystroke;
-    endsL.keystroke = function (key, e, ctrlr) {
-      if (key === 'Tab' || key === 'Enter' || key === 'Spacebar') {
+    endsL.keystroke = function (
+      key: string,
+      e: KeyboardEvent | undefined,
+      ctrlr: Controller
+    ): void {
+      if (key === 'Down' || key === 'Tab') {
+        var dropdown = document.getElementById('mq-suggestions');
+        if (dropdown && dropdown.children.length > 0) {
+          e?.preventDefault();
+          moveSuggestionDown();
+          return;
+        }
+      }
+
+      if (key === 'Up' || key === 'Shift-Tab') {
+        var dropdown = document.getElementById('mq-suggestions');
+        if (dropdown && dropdown.children.length > 0) {
+          e?.preventDefault();
+          moveSuggestionUp();
+          return;
+        }
+      }
+
+      if (key === 'Escape') {
+        hideSuggestions();
+        return;
+      }
+
+      if (key === 'Enter' || key === 'Spacebar') {
+        var selected: string | null = getSelectedSuggestion();
+        if (selected) {
+          e?.preventDefault();
+          hideSuggestions();
+          (this.parent as LatexCommandInput).renderCommand(
+            ctrlr.cursor,
+            selected
+          );
+          return;
+        }
+
+        hideSuggestions();
         var cmd = (this.parent as LatexCommandInput).renderCommand(
           ctrlr.cursor
         );
-        // TODO needs tests
         ctrlr.aria.alert(cmd.mathspeak({ createdLeftOf: ctrlr.cursor }));
         e?.preventDefault();
         return;
@@ -68,7 +244,8 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
       return originalKeystroke.call(this, key, e, ctrlr);
     };
   }
-  createLeftOf(cursor: Cursor) {
+
+  createLeftOf(cursor: Cursor): void {
     super.createLeftOf(cursor);
 
     if (this._replacedFragment) {
@@ -76,14 +253,10 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
       const el = frag.oneElement();
       this._replacedFragment.domFrag().addClass('mq-blur');
 
-      //FIXME: is monkey-patching the mousedown and mousemove handlers the right way to do this?
-      const rewriteMousedownEventTarget = (e: MouseEvent) => {
-        {
-          // TODO - overwritting e.target
-          (e as any).target = el;
-          el.dispatchEvent(e);
-          return false;
-        }
+      const rewriteMousedownEventTarget = (e: MouseEvent): false => {
+        (e as any).target = el;
+        el.dispatchEvent(e);
+        return false;
       };
 
       el.addEventListener('mousedown', rewriteMousedownEventTarget);
@@ -92,31 +265,35 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
       this._replacedFragment.domFrag().insertBefore(frag.children().first());
     }
   }
-  latex() {
+
+  latex(): string {
     return '\\' + this.getEnd(L).latex() + ' ';
   }
-  renderCommand(cursor: Cursor) {
+
+  renderCommand(cursor: Cursor, selectedCmd?: string): MQNode {
     this.setDOM(this.domFrag().children().lastElement());
     this.remove();
+
     if (this[R]) {
       cursor.insLeftOf(this[R] as MQNode);
     } else {
       cursor.insAtRightEnd(this.parent);
     }
 
-    var latex = this.getEnd(L).latex();
+    var latex: string = selectedCmd || this.getEnd(L).latex();
     if (!latex) latex = ' ';
     var cmd = LatexCmds[latex];
 
     if (cmd) {
-      let node: MQNode;
+      var node: MQNode;
       if (isMQNodeClass(cmd)) {
         node = new (cmd as typeof TempSingleCharNode)(latex);
       } else {
         node = cmd(latex);
       }
-      if (this._replacedFragment)
+      if (this._replacedFragment) {
         (node as MathCommand).replaces(this._replacedFragment);
+      }
       node.createLeftOf(cursor);
       return node;
     } else {
@@ -131,5 +308,3 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
     }
   }
 };
-
-// This file has been modified !!!!
