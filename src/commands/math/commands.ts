@@ -810,19 +810,20 @@ class LimitNotation extends MathCommand {
 LatexCmds.lim = LatexCmds.limit = () =>
   new LimitNotation('\\lim ', 'lim', 'limit');
 
+class IndefiniteIntegral extends MQSymbol {
+  constructor() {
+    super(
+      '\\int ',
+      h('span', { class: 'mq-int-indef' }, [h('big', {}, [h.text('\u222B')])]),
+      'integral'
+    );
+  }
+}
+
 LatexCmds.iint =
   LatexCmds.indefint =
   LatexCmds.indefintegral =
-    () => {
-      var symbol = new MQSymbol(
-        '\\int ',
-        h('span', { class: 'mq-int-indef' }, [
-          h('big', {}, [h.text('\u222B')]),
-        ]),
-        'integral'
-      );
-      return symbol;
-    };
+    IndefiniteIntegral;
 
 // MODIFICATIONS END HERE!!!!
 
@@ -993,6 +994,19 @@ var LiveFraction =
         if (!this.replacedFragment) {
           var leftward = cursor[L];
 
+          // MODIFICATIONS START !!!
+          // ← NEW: if immediately left is a closing bracket, grab just that bracket
+          if (leftward instanceof Bracket && leftward.side === 0) {
+            // side === 0 means it's a solid closed bracket pair
+            if (!cursor.isTooDeep(1)) {
+              this.replaces(new Fragment(leftward, leftward as MQNode));
+              cursor[L] = (leftward as MQNode)[L];
+            }
+            super.createLeftOf(cursor);
+            return;
+          }
+          // MODIFICATIONS END !!!
+
           if (!cursor.options.typingSlashCreatesNewFraction) {
             while (
               leftward &&
@@ -1000,6 +1014,9 @@ var LiveFraction =
                 leftward instanceof BinaryOperator ||
                 leftward instanceof (LatexCmds.text || noop) ||
                 leftward instanceof SummationNotation ||
+                // MODIFICATIONS START !!!
+                leftward instanceof IndefiniteIntegral ||
+                // MODIFICATIONS END !!!
                 leftward.ctrlSeq === '\\ ' ||
                 /^[,;:]$/.test(leftward.ctrlSeq as string)
               ) //lookbehind for operator
