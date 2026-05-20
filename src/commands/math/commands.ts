@@ -726,10 +726,6 @@ class SummationNotation extends MathCommand {
   }
 }
 // MODIFICATIONS START HERE!!!!
-// Using SummationNotation for lim clearly doesn't work out:
-// - lim is too large
-// - extra superscript
-// TODO: define a new class
 
 class LimitNotation extends MathCommand {
   constructor(ch: string, symbol: string, ariaLabel?: string) {
@@ -813,6 +809,20 @@ class LimitNotation extends MathCommand {
 
 LatexCmds.lim = LatexCmds.limit = () =>
   new LimitNotation('\\lim ', 'lim', 'limit');
+
+LatexCmds.iint =
+  LatexCmds.indefint =
+  LatexCmds.indefintegral =
+    () => {
+      var symbol = new MQSymbol(
+        '\\int ',
+        h('span', { class: 'mq-int-indef' }, [
+          h('big', {}, [h.text('\u222B')]),
+        ]),
+        'integral'
+      );
+      return symbol;
+    };
 
 // MODIFICATIONS END HERE!!!!
 
