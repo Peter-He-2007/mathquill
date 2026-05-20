@@ -104,8 +104,25 @@ function showSuggestions(
       'cursor:pointer',
       'color:#333',
       'border-bottom:1px solid #f0f0f0',
+      'display:flex',
+      'gap:8px',
+      'align-items:center',
     ].join(';');
-    item.textContent = '\\' + cmd;
+
+    // number badge
+    var badge = document.createElement('span');
+    badge.textContent = String(i + 1);
+    badge.style.cssText = [
+      'color:#999',
+      'font-size:11px',
+      'min-width:12px',
+    ].join(';');
+
+    var label = document.createElement('span');
+    label.textContent = '\\' + cmd;
+
+    item.appendChild(badge);
+    item.appendChild(label);
 
     item.addEventListener('mouseover', function (): void {
       selectedSuggestionIndex = i;
@@ -239,6 +256,26 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
         ctrlr.aria.alert(cmd.mathspeak({ createdLeftOf: ctrlr.cursor }));
         e?.preventDefault();
         return;
+      }
+
+      if (key.match(/^[1-8]$/)) {
+        var dropdown = document.getElementById('mq-suggestions');
+        if (dropdown && dropdown.children.length > 0) {
+          var index = parseInt(key) - 1;
+          var item = dropdown.children[index] as HTMLElement;
+          if (item) {
+            e?.preventDefault();
+            var selectedCmd = item.getAttribute('data-cmd'); // ← renamed
+            if (selectedCmd) {
+              hideSuggestions();
+              (this.parent as LatexCommandInput).renderCommand(
+                ctrlr.cursor,
+                selectedCmd
+              );
+              return;
+            }
+          }
+        }
       }
 
       return originalKeystroke.call(this, key, e, ctrlr);
