@@ -237,6 +237,29 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
         return;
       }
 
+      if (key === 'Backspace') {
+        var current = (this.parent as LatexCommandInput).getEnd(L).latex();
+        if (current.length <= 0) {
+          // deleting the last character, so \ will be removed next
+          hideSuggestions();
+        } else {
+          // still has partial command, update suggestions with one less character
+          var self = this;
+          var remaining = current.slice(0, -1);
+          showSuggestions(
+            remaining,
+            ctrlr.cursor,
+            function (cmd: string): void {
+              (self.parent as LatexCommandInput).renderCommand(
+                ctrlr.cursor,
+                cmd
+              );
+            }
+          );
+        }
+        // fall through to default backspace handling
+      }
+
       if (key === 'Enter' || key === 'Spacebar') {
         var selected: string | null = getSelectedSuggestion();
         if (selected) {
@@ -344,4 +367,10 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
       return node;
     }
   }
+  // MODDED START !!!
+  remove() {
+    hideSuggestions();
+    return super.remove();
+  }
+  // MODDED END !!!
 };
