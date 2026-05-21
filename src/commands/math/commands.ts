@@ -68,6 +68,40 @@ var SVG_SYMBOLS = {
         }),
       ]),
   },
+
+  // MODIFCIATIONS START !!!
+
+  '&lfloor;': {
+    width: '.55em',
+    html: () =>
+      h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 11 24' }, [
+        h('path', { d: 'M2 0 L3 0 L3 23 L7 23 L7 24 L2 24' }),
+      ]),
+  },
+  '&rfloor;': {
+    width: '.55em',
+    html: () =>
+      h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 11 24' }, [
+        h('path', { d: 'M8 0 L7 0 L7 23 L3 23 L3 24 L8 24' }),
+      ]),
+  },
+  '&lceil': {
+    width: '.55em',
+    html: () =>
+      h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 11 24' }, [
+        h('path', { d: 'M2 24 L3 24 L3 1 L7 1 L7 0 L2 0' }),
+      ]),
+  },
+  '&rceil': {
+    width: '.55em',
+    html: () =>
+      h('svg', { preserveAspectRatio: 'none', viewBox: '0 0 11 24' }, [
+        h('path', { d: 'M8 24 L7 24 L7 1 L3 1 L3 0 L8 0' }),
+      ]),
+  },
+
+  // MODFICATIONS EDN !!!
+
   '&#8741;': {
     width: '.7em',
     html: () =>
@@ -1537,13 +1571,26 @@ var OPP_BRACKS = {
   '}': '{',
   '\\{': '\\}',
   '\\}': '\\{',
+  // MODFIFICATIONS START !!!
+  //*
+  '&lfloor;': '&rfloor;',
+  '&rfloor;': '&lfloor;',
+  '&lceil;': '&rceil;',
+  '&rceil;': '&lceil;',
+
+  // '\\lfloor ': '\\rfloor ',
+  // '\\rfloor ': '\\lfloor ',
+  // '\\lceil ': '\\rceil ',
+  // '\\rceil ': '\\lceil ',
+  //*/
+  // MODFIDFICATIONS ENDD !!!
   '&lang;': '&rang;',
   '&rang;': '&lang;',
-  '\\langle ': '\\rangle ',
-  '\\rangle ': '\\langle ',
+  '\\langle ': '\\rangle ', // Is this necessary? ...
+  '\\rangle ': '\\langle ', // Is this necessary? ...
   '|': '|',
-  '\\lVert ': '\\rVert ',
-  '\\rVert ': '\\lVert ',
+  '\\lVert ': '\\rVert ', // is this necessary? ...
+  '\\rVert ': '\\lVert ', // is this necessary? ...
 };
 
 var BRACKET_NAMES = {
@@ -1578,6 +1625,21 @@ LatexCmds.lVert = () =>
   new Bracket(L, '&#8741;', '&#8741;', '\\lVert ', '\\rVert ');
 LatexCmds.rVert = () =>
   new Bracket(R, '&#8741;', '&#8741;', '\\lVert ', '\\rVert ');
+
+// MODIFICATIONS START!!!
+
+//*
+LatexCmds.lfloor = () =>
+  new Bracket(L, '&lfloor;', '&rfloor;', '\\lfloor ', '\\rfloor ');
+LatexCmds.rfloor = () =>
+  new Bracket(R, '&lfloor;', '&rfloor;', '\\lfloor ', '\\rfloor ');
+LatexCmds.lceil = () =>
+  new Bracket(L, '&lceil', '&rceil', '\\lceil ', '\\rceil ');
+LatexCmds.rceil = () =>
+  new Bracket(R, '&lceil', '&rceil', '\\lceil ', '\\rceil ');
+//*/
+
+// MODIFICATIONS END!!!
 
 LatexCmds.left = class extends MathCommand {
   parser() {
