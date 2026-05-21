@@ -476,7 +476,7 @@ LatexCmds.lfloor = bindVanillaSymbol('\\lfloor ', '&#8970;', 'left floor');
 LatexCmds.rfloor = bindVanillaSymbol('\\rfloor ', '&#8971;', 'right floor');
 LatexCmds.lceil = bindVanillaSymbol('\\lceil ', '&#8968;', 'left ceiling');
 LatexCmds.rceil = bindVanillaSymbol('\\rceil ', '&#8969;', 'right ceiling');
-//*/
+
 LatexCmds.opencurlybrace = LatexCmds.lbrace = bindVanillaSymbol(
   '\\lbrace ',
   '{',
@@ -487,12 +487,14 @@ LatexCmds.closecurlybrace = LatexCmds.rbrace = bindVanillaSymbol(
   '}',
   'right brace'
 );
-LatexCmds.lbrack = bindVanillaSymbol('[', 'left bracket');
-LatexCmds.rbrack = bindVanillaSymbol(']', 'right bracket');
+*/
+//LatexCmds.lbrack = bindVanillaSymbol('[', 'left bracket'); // MODDED !!!
+//LatexCmds.rbrack = bindVanillaSymbol(']', 'right bracket'); // MODDED !!!
 
 //various symbols
-LatexCmds.slash = bindVanillaSymbol('/', 'slash');
-LatexCmds.vert = bindVanillaSymbol('|', 'vertical bar');
+//LatexCmds.slash = bindVanillaSymbol('/', 'slash'); // MODDED !!!
+//LatexCmds.vert = bindVanillaSymbol('|', 'vertical bar'); // MODDED!!!
+LatexCmds.vert = bindVanillaSymbol('|', '&#124;'); // MODDED!!!
 LatexCmds.perp = LatexCmds.perpendicular = bindVanillaSymbol(
   '\\perp ',
   '&perp;',

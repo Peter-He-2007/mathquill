@@ -1621,10 +1621,10 @@ LatexCmds.langle = () =>
 LatexCmds.rangle = () =>
   new Bracket(R, '&lang;', '&rang;', '\\langle ', '\\rangle ');
 CharCmds['|'] = () => new Bracket(L, '|', '|', '|', '|');
-LatexCmds.lVert = () =>
-  new Bracket(L, '&#8741;', '&#8741;', '\\lVert ', '\\rVert ');
-LatexCmds.rVert = () =>
-  new Bracket(R, '&#8741;', '&#8741;', '\\lVert ', '\\rVert ');
+LatexCmds.lvert = () =>
+  new Bracket(L, '&#8741;', '&#8741;', '\\lvert ', '\\rvert ');
+LatexCmds.rvert = () =>
+  new Bracket(R, '&#8741;', '&#8741;', '\\lvert ', '\\rvert ');
 
 // MODIFICATIONS START!!!
 
@@ -1640,7 +1640,7 @@ LatexCmds.rceil = () =>
 //*/
 
 // MODIFICATIONS END!!!
-
+/* What is the point of this ? ...
 LatexCmds.left = class extends MathCommand {
   parser() {
     var regex = Parser.regex;
@@ -1690,7 +1690,7 @@ LatexCmds.right = class extends MathCommand {
     return Parser.fail('unmatched \\right');
   }
 };
-
+//*/
 var leftBinomialSymbol = SVG_SYMBOLS['('];
 var rightBinomialSymbol = SVG_SYMBOLS[')'];
 class Binomial extends DelimsNode {
