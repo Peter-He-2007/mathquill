@@ -1578,19 +1578,19 @@ var OPP_BRACKS = {
   '&lceil;': '&rceil;',
   '&rceil;': '&lceil;',
 
-  // '\\lfloor ': '\\rfloor ',
-  // '\\rfloor ': '\\lfloor ',
-  // '\\lceil ': '\\rceil ',
-  // '\\rceil ': '\\lceil ',
+  '\\lfloor ': '\\rfloor ',
+  '\\rfloor ': '\\lfloor ',
+  '\\lceil ': '\\rceil ',
+  '\\rceil ': '\\lceil ',
   //*/
   // MODFIDFICATIONS ENDD !!!
   '&lang;': '&rang;',
   '&rang;': '&lang;',
-  '\\langle ': '\\rangle ', // Is this necessary? ...
-  '\\rangle ': '\\langle ', // Is this necessary? ...
+  '\\langle ': '\\rangle ',
+  '\\rangle ': '\\langle ',
   '|': '|',
-  '\\lVert ': '\\rVert ', // is this necessary? ...
-  '\\rVert ': '\\lVert ', // is this necessary? ...
+  '\\lvert ': '\\rvert ',
+  '\\rvert ': '\\lvert ',
 };
 
 var BRACKET_NAMES = {
@@ -1621,14 +1621,13 @@ LatexCmds.langle = () =>
 LatexCmds.rangle = () =>
   new Bracket(R, '&lang;', '&rang;', '\\langle ', '\\rangle ');
 CharCmds['|'] = () => new Bracket(L, '|', '|', '|', '|');
-LatexCmds.lvert = () =>
-  new Bracket(L, '&#8741;', '&#8741;', '\\lvert ', '\\rvert ');
-LatexCmds.rvert = () =>
-  new Bracket(R, '&#8741;', '&#8741;', '\\lvert ', '\\rvert ');
+// OG CODE LatexCmds.lvert = () =>
+// OG CODE   new Bracket(L, '&#8741;', '&#8741;', '\\lvert ', '\\rvert ');
+// OG CODE LatexCmds.rvert = () =>
+// OG CODE   new Bracket(R, '&#8741;', '&#8741;', '\\lvert ', '\\rvert ');
 
 // MODIFICATIONS START!!!
 
-//*
 LatexCmds.lfloor = () =>
   new Bracket(L, '&lfloor;', '&rfloor;', '\\lfloor ', '\\rfloor ');
 LatexCmds.rfloor = () =>
@@ -1637,10 +1636,12 @@ LatexCmds.lceil = () =>
   new Bracket(L, '&lceil', '&rceil', '\\lceil ', '\\rceil ');
 LatexCmds.rceil = () =>
   new Bracket(R, '&lceil', '&rceil', '\\lceil ', '\\rceil ');
-//*/
+
+LatexCmds.lvert = () => new Bracket(L, '|', '|', '\\lvert ', '\\rvert ');
+LatexCmds.rvert = () => new Bracket(R, '|', '|', '\\lvert ', '\\rvert ');
 
 // MODIFICATIONS END!!!
-/* What is the point of this ? ...
+/* What is the point of this ? OG CODE ...
 LatexCmds.left = class extends MathCommand {
   parser() {
     var regex = Parser.regex;
