@@ -159,9 +159,11 @@ LatexCmds.nsupe =
 //   }
 // };
 
-LatexCmds.N = LatexCmds.mathbbN;
-LatexCmds.naturals = LatexCmds.setnaturals;
-bindVanillaSymbol('\\mathbb{N}', '&#8469;', 'naturals');
+LatexCmds.N =
+  LatexCmds.mathbbN =
+  LatexCmds.naturals =
+  LatexCmds.setnaturals =
+    bindVanillaSymbol('\\mathbb{N}', '&#8469;', 'naturals');
 
 LatexCmds.P =
   LatexCmds.mathbbP =
@@ -181,25 +183,24 @@ LatexCmds.Q =
   LatexCmds.setrationals =
     bindVanillaSymbol('\\mathbb{Q}', '&#8474;', 'rationals');
 
-LatexCmds.R = LatexCmds.mathbbR;
-LatexCmds.reals = LatexCmds.setreals = bindVanillaSymbol(
-  '\\mathbb{R}',
-  '&#8477;',
-  'reals'
-);
+LatexCmds.R =
+  LatexCmds.mathbbR =
+  LatexCmds.reals =
+  LatexCmds.setreals =
+    bindVanillaSymbol('\\mathbb{R}', '&#8477;', 'reals');
 
 LatexCmds.C =
+  LatexCmds.mathbbC =
   LatexCmds.complex =
   LatexCmds.complexplane =
   LatexCmds.complexes =
     bindVanillaSymbol('\\mathbb{C}', '&#8450;', 'complexes');
 
-LatexCmds.H = LatexCmds.mathbbH;
-LatexCmds.hamiltonian = LatexCmds.quaternions = bindVanillaSymbol(
-  '\\mathbb{H}',
-  '&#8461;',
-  'quaternions'
-);
+LatexCmds.H =
+  LatexCmds.mathbbH =
+  LatexCmds.hamiltonian =
+  LatexCmds.quaternions =
+    bindVanillaSymbol('\\mathbb{H}', '&#8461;', 'quaternions');
 
 //spacing
 LatexCmds.quad = LatexCmds.emsp = bindVanillaSymbol(

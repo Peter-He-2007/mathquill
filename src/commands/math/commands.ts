@@ -182,8 +182,6 @@ LatexCmds.mathsf = () =>
   );
 LatexCmds.mathtt = () =>
   new Style('\\mathtt', 'span', { class: 'mq-monospace mq-font' }, 'Math Text');
-LatexCmds.mathbb = () =>
-  new Style('\\mathbb', 'span', { class: 'mq-mathbb' }, 'Blackboard Bold');
 //text-decoration
 LatexCmds.underline = () =>
   new Style(
