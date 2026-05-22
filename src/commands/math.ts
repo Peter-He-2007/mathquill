@@ -571,44 +571,90 @@ class MathBlock extends MathElement {
       ctrlr.options.spaceBehavesLikeTab &&
       (key === 'Spacebar' || key === 'Shift-Spacebar')
     ) {
+      console.log('dfasdf');
       e?.preventDefault();
       ctrlr.escapeDir(key === 'Shift-Spacebar' ? L : R, key, e);
       return;
     }
     // MOD START!!!
+    /*
     if (key === 'Spacebar') {
+      console.log("dfasdf"); //Debug ...
       e?.preventDefault();
-      let cursor = ctrlr.cursor;
-      let currentBlock = this;
-      let allBlocks = getAllBlocks(ctrlr.root);
-      let currentIndex = allBlocks.indexOf(currentBlock);
+      var cursor = ctrlr.cursor;
 
-      if (currentIndex < allBlocks.length - 1) {
-        // move to start of next block
-        cursor.insAtLeftEnd(allBlocks[currentIndex + 1]);
+      // find the next MathCommand to the right of the cursor in the current block
+      var nextCmd: MQNode | 0 = cursor[R];
+      while (nextCmd && !(nextCmd instanceof MathCommand)) {
+        nextCmd = nextCmd[R];
+      }
+
+      // find the next MathBlock sibling of the current block
+      var currentBlock = cursor.parent;
+      var nextBlock: MQNode | 0 = currentBlock[R];
+      while (nextBlock && !(nextBlock instanceof MathBlock)) {
+        nextBlock = nextBlock[R];
+      }
+
+      if (!nextCmd && !nextBlock) {
+        // no more MathCommands or MathBlocks — exit to right of parent command
+        var parentCmd = currentBlock.parent;
+        if (parentCmd) {
+          cursor.insRightOf(parentCmd);
+        }
+      } else if (!nextCmd) {
+        // no more MathCommands but there is another MathBlock — go to it
+        cursor.insAtLeftEnd(nextBlock as MathBlock);
       } else {
-        // already at last block — go to end of root
-        cursor.insAtRightEnd(ctrlr.root);
+        // there is a next MathCommand — go to its first MathBlock
+        var firstBlock = (nextCmd as MathCommand).getEnd(L);
+        if (firstBlock) {
+          cursor.insAtLeftEnd(firstBlock as MathBlock);
+        } else {
+          cursor.insRightOf(nextCmd as MQNode);
+        }
       }
       return;
     }
 
     if (key === 'Shift-Spacebar') {
       e?.preventDefault();
-      let cursor = ctrlr.cursor;
-      let currentBlock = this;
-      let allBlocks = getAllBlocks(ctrlr.root);
-      let currentIndex = allBlocks.indexOf(currentBlock);
+      var cursor = ctrlr.cursor;
 
-      if (currentIndex > 0) {
-        // move to end of previous block
-        cursor.insAtRightEnd(allBlocks[currentIndex - 1]);
+      // find the previous MathCommand to the left of the cursor
+      var prevCmd: MQNode | 0 = cursor[L];
+      while (prevCmd && !(prevCmd instanceof MathCommand)) {
+        prevCmd = prevCmd[L];
+      }
+
+      // find the previous MathBlock sibling of the current block
+      var currentBlock = cursor.parent;
+      var prevBlock: MQNode | 0 = currentBlock[L];
+      while (prevBlock && !(prevBlock instanceof MathBlock)) {
+        prevBlock = prevBlock[L];
+      }
+
+      if (!prevCmd && !prevBlock) {
+        // no more MathCommands or MathBlocks — exit to left of parent command
+        var parentCmd = currentBlock.parent;
+        if (parentCmd) {
+          cursor.insLeftOf(parentCmd);
+        }
+      } else if (!prevCmd) {
+        // no more MathCommands but there is a previous MathBlock — go to it
+        cursor.insAtRightEnd(prevBlock as MathBlock);
       } else {
-        // already at first block — go to start of root
-        cursor.insAtLeftEnd(ctrlr.root);
+        // there is a previous MathCommand — go to its last MathBlock
+        var lastBlock = (prevCmd as MathCommand).getEnd(R);
+        if (lastBlock) {
+          cursor.insAtRightEnd(lastBlock as MathBlock);
+        } else {
+          cursor.insLeftOf(prevCmd as MQNode);
+        }
       }
       return;
     }
+    //*/
     // MOD END !!!
     return super.keystroke(key, e, ctrlr);
   }

@@ -848,7 +848,9 @@ class IndefiniteIntegral extends MQSymbol {
   constructor() {
     super(
       '\\int ',
-      h('span', { class: 'mq-int-indef' }, [h.text('\u222B')]),
+      h('span', { class: 'mq-int mq-non-leaf' }, [
+        h('big', {}, [h.text(U_INTEGRAL)]),
+      ]),
       'integral'
     );
   }
@@ -857,42 +859,7 @@ class IndefiniteIntegral extends MQSymbol {
 LatexCmds.iint =
   LatexCmds.indefint =
   LatexCmds.indefintegral =
-    class extends SummationNotation {
-      constructor() {
-        super('\\int ', '', 'integral');
-
-        this.ariaLabel = 'integral';
-        this.domView = new DOMView(0, () =>
-          h('span', { class: 'mq-int mq-non-leaf' }, [
-            h('big', {}, [h.text(U_INTEGRAL)]),
-          ])
-        );
-      }
-
-      placeCursor(cursor: Cursor) {
-        cursor.insRightOf(this);
-      }
-
-      createLeftOf(cursor: Cursor) {
-        // FIXME: refactor rather than overriding
-        MathCommand.prototype.createLeftOf.call(this, cursor);
-      }
-
-      mathspeak(): string {
-        return 'integral';
-      }
-
-      latex(): string {
-        return '\\int ';
-      }
-
-      // override parser so it doesn't try to parse _ and ^ blocks
-      parser() {
-        return Parser.succeed(this);
-      }
-
-      finalizeTree() {}
-    };
+    () => new IndefiniteIntegral();
 
 // MODIFICATIONS END HERE!!!!
 
