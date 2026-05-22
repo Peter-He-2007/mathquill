@@ -567,19 +567,17 @@ class MathBlock extends MathElement {
   ariaLabel = 'block';
 
   keystroke(key: string, e: KeyboardEvent | undefined, ctrlr: Controller) {
-    if (
-      ctrlr.options.spaceBehavesLikeTab &&
-      (key === 'Spacebar' || key === 'Shift-Spacebar')
-    ) {
-      console.log('dfasdf');
-      e?.preventDefault();
-      ctrlr.escapeDir(key === 'Shift-Spacebar' ? L : R, key, e);
-      return;
-    }
+    // if (
+    //   ctrlr.options.spaceBehavesLikeTab &&
+    //   (key === 'Spacebar' || key === 'Shift-Spacebar')
+    // ) {
+    //   e?.preventDefault();
+    //   ctrlr.escapeDir(key === 'Shift-Spacebar' ? L : R, key, e);
+    //   return;
+    // }
     // MOD START!!!
-    /*
+    //*
     if (key === 'Spacebar') {
-      console.log("dfasdf"); //Debug ...
       e?.preventDefault();
       var cursor = ctrlr.cursor;
 

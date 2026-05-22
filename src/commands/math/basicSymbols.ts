@@ -751,6 +751,36 @@ LatexCmds['″'] = LatexCmds.dprime = bindVanillaSymbol(
   'double prime'
 );
 
+// MOD START !!!
+
+function bindCharWithSpace(ch: string, latexCmd: string, display: string) {
+  return class extends MQSymbol {
+    constructor() {
+      super(ch, h('span', {}, [h.text(display)]), display);
+    }
+
+    createLeftOf(cursor: Cursor) {
+      super.createLeftOf(cursor);
+      new VanillaSymbol(
+        '\\ ',
+        h('span', {}, [h.text('\u00A0')]),
+        ' '
+      ).createLeftOf(cursor);
+    }
+
+    latex(): string {
+      return latexCmd;
+    }
+  };
+}
+
+CharCmds[','] = bindCharWithSpace(',', ',', ',');
+CharCmds[':'] = bindCharWithSpace(':', ':', ':');
+CharCmds[';'] = bindCharWithSpace(';', ';', ';');
+CharCmds['.'] = bindCharWithSpace('.', '.', '.');
+
+// MOD END !!!
+
 LatexCmds.backslash = bindVanillaSymbol('\\backslash ', '\\', 'backslash');
 if (!CharCmds['\\']) CharCmds['\\'] = LatexCmds.backslash;
 
