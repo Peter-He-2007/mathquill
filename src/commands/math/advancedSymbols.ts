@@ -159,50 +159,47 @@ LatexCmds.nsupe =
 //   }
 // };
 
-LatexCmds.N =
-  LatexCmds.naturals =
-  LatexCmds.Naturals =
-    bindVanillaSymbol('\\mathbb{N}', '&#8469;', 'naturals');
+LatexCmds.N = LatexCmds.mathbbN;
+LatexCmds.naturals = LatexCmds.setnaturals;
+bindVanillaSymbol('\\mathbb{N}', '&#8469;', 'naturals');
 
 LatexCmds.P =
+  LatexCmds.mathbbP =
   LatexCmds.primes =
-  LatexCmds.Primes =
-  LatexCmds.projective =
-  LatexCmds.Projective =
-  LatexCmds.probability =
-  LatexCmds.Probability =
+  LatexCmds.setprimes =
     bindVanillaSymbol('\\mathbb{P}', '&#8473;', 'P');
 
 LatexCmds.Z =
+  LatexCmds.mathbbZ =
   LatexCmds.integers =
-  LatexCmds.Integers =
+  LatexCmds.setintegers =
     bindVanillaSymbol('\\mathbb{Z}', '&#8484;', 'integers');
 
 LatexCmds.Q =
+  LatexCmds.mathbbQ =
   LatexCmds.rationals =
-  LatexCmds.Rationals =
+  LatexCmds.setrationals =
     bindVanillaSymbol('\\mathbb{Q}', '&#8474;', 'rationals');
 
-LatexCmds.R =
-  LatexCmds.reals =
-  LatexCmds.Reals =
-    bindVanillaSymbol('\\mathbb{R}', '&#8477;', 'reals');
+LatexCmds.R = LatexCmds.mathbbR;
+LatexCmds.reals = LatexCmds.setreals = bindVanillaSymbol(
+  '\\mathbb{R}',
+  '&#8477;',
+  'reals'
+);
 
 LatexCmds.C =
   LatexCmds.complex =
-  LatexCmds.Complex =
-  LatexCmds.complexes =
-  LatexCmds.Complexes =
   LatexCmds.complexplane =
-  LatexCmds.Complexplane =
-  LatexCmds.ComplexPlane =
+  LatexCmds.complexes =
     bindVanillaSymbol('\\mathbb{C}', '&#8450;', 'complexes');
 
-LatexCmds.H =
-  LatexCmds.Hamiltonian =
-  LatexCmds.quaternions =
-  LatexCmds.Quaternions =
-    bindVanillaSymbol('\\mathbb{H}', '&#8461;', 'quaternions');
+LatexCmds.H = LatexCmds.mathbbH;
+LatexCmds.hamiltonian = LatexCmds.quaternions = bindVanillaSymbol(
+  '\\mathbb{H}',
+  '&#8461;',
+  'quaternions'
+);
 
 //spacing
 LatexCmds.quad = LatexCmds.emsp = bindVanillaSymbol(
@@ -515,10 +512,11 @@ LatexCmds.perp = LatexCmds.perpendicular = bindVanillaSymbol(
 LatexCmds.nabla = LatexCmds.del = bindVanillaSymbol('\\nabla ', '&nabla;');
 LatexCmds.hbar = bindVanillaSymbol('\\hbar ', '&#8463;', 'horizontal bar');
 
-LatexCmds.AA =
-  LatexCmds.Angstrom =
-  LatexCmds.angstrom =
-    bindVanillaSymbol('\\text\\AA ', '&#8491;', 'AA');
+LatexCmds.AA = LatexCmds.angstrom = bindVanillaSymbol(
+  '\\text\\AA ',
+  '&#8491;',
+  'AA'
+);
 
 LatexCmds.ring =
   LatexCmds.circ =
@@ -624,18 +622,13 @@ LatexCmds.hArr =
   LatexCmds.Leftrightarrow =
     bindVanillaSymbol('\\Leftrightarrow ', '&hArr;', 'left and right arrow');
 
-LatexCmds.Re =
-  LatexCmds.Real =
-  LatexCmds.real =
-    bindVanillaSymbol('\\Re ', '&real;', 'real');
+LatexCmds.real = bindVanillaSymbol('\\Re ', '&real;', 'real');
 
-LatexCmds.Im =
-  LatexCmds.imag =
-  LatexCmds.image =
-  LatexCmds.imagin =
-  LatexCmds.imaginary =
-  LatexCmds.Imaginary =
-    bindVanillaSymbol('\\Im ', '&image;', 'imaginary');
+LatexCmds.im = LatexCmds.imaginary = bindVanillaSymbol(
+  '\\Im ',
+  '&image;',
+  'imaginary'
+);
 
 LatexCmds.part = LatexCmds.partial = bindVanillaSymbol(
   '\\partial ',
@@ -678,7 +671,6 @@ LatexCmds.o =
   LatexCmds.empty =
   LatexCmds.emptyset =
   LatexCmds.oslash =
-  LatexCmds.Oslash =
   LatexCmds.nothing =
   LatexCmds.varnothing =
     bindBinaryOperator('\\varnothing ', '&empty;', 'nothing');
