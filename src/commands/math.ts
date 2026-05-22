@@ -465,6 +465,37 @@ function bindBinaryOperator(
  * symbols and operators that descend (in the Math DOM tree) from
  * ancestor operators.
  */
+
+// MOD START !!!
+// helper function — collect all MathBlocks in document order
+function getAllBlocks(root: MQNode): MathBlock[] {
+  var blocks: MathBlock[] = [];
+  root.postOrder(function (node: MQNode) {
+    if (node instanceof MathBlock) {
+      blocks.push(node as MathBlock);
+    }
+  });
+  return blocks;
+}
+
+function getAllBlocksInOrder(root: MQNode): MathBlock[] {
+  var blocks: MathBlock[] = [];
+
+  function traverse(node: MQNode) {
+    if (node instanceof MathBlock) {
+      blocks.push(node as MathBlock);
+    }
+    node.eachChild(function (child: MQNode) {
+      traverse(child);
+      return undefined;
+    });
+  }
+
+  traverse(root);
+  return blocks;
+}
+// MOD END !!!
+
 class MathBlock extends MathElement {
   controller?: Controller;
 
@@ -544,6 +575,41 @@ class MathBlock extends MathElement {
       ctrlr.escapeDir(key === 'Shift-Spacebar' ? L : R, key, e);
       return;
     }
+    // MOD START!!!
+    if (key === 'Spacebar') {
+      e?.preventDefault();
+      let cursor = ctrlr.cursor;
+      let currentBlock = this;
+      let allBlocks = getAllBlocks(ctrlr.root);
+      let currentIndex = allBlocks.indexOf(currentBlock);
+
+      if (currentIndex < allBlocks.length - 1) {
+        // move to start of next block
+        cursor.insAtLeftEnd(allBlocks[currentIndex + 1]);
+      } else {
+        // already at last block — go to end of root
+        cursor.insAtRightEnd(ctrlr.root);
+      }
+      return;
+    }
+
+    if (key === 'Shift-Spacebar') {
+      e?.preventDefault();
+      let cursor = ctrlr.cursor;
+      let currentBlock = this;
+      let allBlocks = getAllBlocks(ctrlr.root);
+      let currentIndex = allBlocks.indexOf(currentBlock);
+
+      if (currentIndex > 0) {
+        // move to end of previous block
+        cursor.insAtRightEnd(allBlocks[currentIndex - 1]);
+      } else {
+        // already at first block — go to start of root
+        cursor.insAtLeftEnd(ctrlr.root);
+      }
+      return;
+    }
+    // MOD END !!!
     return super.keystroke(key, e, ctrlr);
   }
 

@@ -2,6 +2,9 @@
  * Symbols for Advanced Mathematics
  ***********************************/
 
+/**********************************************************************/
+/* 1. Binary Operators ************************************************/
+
 LatexCmds.notin =
   LatexCmds.cong =
   LatexCmds.equiv =
@@ -125,6 +128,9 @@ LatexCmds.nsupe =
       'not superset or equal to'
     );
 
+/**********************************************************************/
+/* 2. mathbb **********************************************************/
+
 //the canonical sets of numbers
 LatexCmds.mathbb = class extends MathCommand {
   createLeftOf(_cursor: Cursor) {}
@@ -201,10 +207,10 @@ LatexCmds.H =
 //spacing
 LatexCmds.quad = LatexCmds.emsp = bindVanillaSymbol(
   '\\quad ',
-  '    ',
+  '&#x2001;',
   '4 spaces'
 );
-LatexCmds.qquad = bindVanillaSymbol('\\qquad ', '        ', '8 spaces');
+//LatexCmds.qquad = bindVanillaSymbol('\\qquad ', '        ', '8 spaces');
 /* spacing special characters, gonna have to implement this in LatexCommandInput::onText somehow
 case ',':
   return VanillaSymbol('\\, ',' ', 'comma');
@@ -216,7 +222,13 @@ case '!':
   return MQSymbol('\\! ','<span style="margin-right:-.2em"></span>', 'exclamation point');
 */
 
-//binary operators
+// MODDED START !!!
+
+// MODDED END !!!
+
+/**********************************************************************/
+/* 3. Vanilla Symbols *************************************************/
+
 LatexCmds.diamond = bindVanillaSymbol('\\diamond ', '&#9671;', 'diamond');
 LatexCmds.bigtriangleup = bindVanillaSymbol(
   '\\bigtriangleup ',
@@ -471,7 +483,7 @@ LatexCmds.bigoplus = bindVanillaSymbol('\\bigoplus ', '&#8853;', 'big o plus');
 LatexCmds.biguplus = bindVanillaSymbol('\\biguplus ', '&#8846;', 'big u plus');
 
 //delimiters
-/* Commented out origiginaln floor and ceiling
+/* Commented out origiginaln floor and ceiling !!!
 LatexCmds.lfloor = bindVanillaSymbol('\\lfloor ', '&#8970;', 'left floor');
 LatexCmds.rfloor = bindVanillaSymbol('\\rfloor ', '&#8971;', 'right floor');
 LatexCmds.lceil = bindVanillaSymbol('\\lceil ', '&#8968;', 'left ceiling');
