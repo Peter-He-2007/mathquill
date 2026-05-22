@@ -169,8 +169,8 @@ LatexCmds.mathrm = class extends Style {
     return true;
   }
 };
-LatexCmds.mathit = () =>
-  new Style('\\mathit', 'i', { class: 'mq-font' }, 'Italic Font');
+// OG CODE LatexCmds.mathit = () =>
+// OG CODE   new Style('\\mathit', 'i', { class: 'mq-font' }, 'Italic Font');
 LatexCmds.mathbf = () =>
   new Style('\\mathbf', 'b', { class: 'mq-font' }, 'Bold Font');
 LatexCmds.mathsf = () =>
@@ -182,6 +182,8 @@ LatexCmds.mathsf = () =>
   );
 LatexCmds.mathtt = () =>
   new Style('\\mathtt', 'span', { class: 'mq-monospace mq-font' }, 'Math Text');
+LatexCmds.mathbb = () =>
+  new Style('\\mathbb', 'span', { class: 'mq-mathbb' }, 'Blackboard Bold');
 //text-decoration
 LatexCmds.underline = () =>
   new Style(
