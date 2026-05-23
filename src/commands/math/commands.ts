@@ -2567,8 +2567,7 @@ LatexCmds.bmatrix = LatexCmds.bmat = Matrix;
 LatexCmds.pmatrix = LatexCmds.pmat = Pmatrix;
 LatexCmds.dmatrix =
   LatexCmds.dmat =
-  LatexCmds.detmat =
-  LatexCmds.detmatrix =
+  LatexCmds.determinatematrix =
   LatexCmds.vmat =
   LatexCmds.vmatrix =
     Dmatrix;

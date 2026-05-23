@@ -577,7 +577,7 @@ class MathBlock extends MathElement {
     // }
     // MOD START!!!
     //*
-    if (key === 'Spacebar') {
+    if (key === 'Spacebar' || key === 'Tab') {
       e?.preventDefault();
       var cursor = ctrlr.cursor;
 
@@ -615,7 +615,7 @@ class MathBlock extends MathElement {
       return;
     }
 
-    if (key === 'Shift-Spacebar') {
+    if (key === 'Shift-Spacebar' || key === 'Shift-Tab') {
       e?.preventDefault();
       var cursor = ctrlr.cursor;
 
@@ -652,6 +652,19 @@ class MathBlock extends MathElement {
       }
       return;
     }
+
+    // Handling backspace on a MathBlock that is empty that has a prev MathBlock
+    // TODO: Finish this implementation...
+    var cursor = ctrlr.cursor;
+    var currentBlock = cursor.parent;
+    var prevBlock: MQNode | 0 = currentBlock[L];
+    if (prevBlock /*&& currentBlock is empty */ && key === 'Backspace') {
+      e?.preventDefault();
+      console.log('dasgpasodhigpasohg'); // Debug ...
+      // no more MathCommands but there is a previous MathBlock — go to it
+      cursor.insAtRightEnd(prevBlock as MathBlock);
+    }
+
     //*/
     // MOD END !!!
     return super.keystroke(key, e, ctrlr);
