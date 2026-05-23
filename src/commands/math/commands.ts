@@ -1644,6 +1644,7 @@ LatexCmds.rvert = () => new Bracket(R, '|', '|', '\\lvert ', '\\rvert ');
 
 // MODIFICATIONS END!!!
 //* What is the point of this ? OG CODE ...
+//  TODO: make these invisible to suggestions ...
 LatexCmds.left = class extends MathCommand {
   parser() {
     var regex = Parser.regex;

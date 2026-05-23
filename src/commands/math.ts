@@ -654,15 +654,20 @@ class MathBlock extends MathElement {
     }
 
     // Handling backspace on a MathBlock that is empty that has a prev MathBlock
-    // TODO: Finish this implementation...
-    var cursor = ctrlr.cursor;
-    var currentBlock = cursor.parent;
-    var prevBlock: MQNode | 0 = currentBlock[L];
-    if (prevBlock /*&& currentBlock is empty */ && key === 'Backspace') {
-      e?.preventDefault();
-      console.log('dasgpasodhigpasohg'); // Debug ...
-      // no more MathCommands but there is a previous MathBlock — go to it
-      cursor.insAtRightEnd(prevBlock as MathBlock);
+    if (key === 'Backspace') {
+      var cursor = ctrlr.cursor;
+      var currentBlock = cursor.parent;
+      var prevBlock: MQNode | 0 = currentBlock[L];
+
+      if (
+        prevBlock instanceof MathBlock && // there is a previous sibling block
+        currentBlock.isEmpty() // current block is empty
+      ) {
+        e?.preventDefault();
+        cursor.insAtRightEnd(prevBlock as MathBlock);
+        return;
+      }
+      // fall through to default backspace handling if conditions not met
     }
 
     //*/
