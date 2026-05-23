@@ -1643,7 +1643,7 @@ LatexCmds.lvert = () => new Bracket(L, '|', '|', '\\lvert ', '\\rvert ');
 LatexCmds.rvert = () => new Bracket(R, '|', '|', '\\lvert ', '\\rvert ');
 
 // MODIFICATIONS END!!!
-/* What is the point of this ? OG CODE ...
+//* What is the point of this ? OG CODE ...
 LatexCmds.left = class extends MathCommand {
   parser() {
     var regex = Parser.regex;
