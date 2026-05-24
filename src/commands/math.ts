@@ -661,7 +661,8 @@ class MathBlock extends MathElement {
 
       if (
         prevBlock instanceof MathBlock && // there is a previous sibling block
-        currentBlock.isEmpty() // current block is empty
+        currentBlock.isEmpty() && // current block is empty
+        !(currentBlock.parent instanceof SupSub)
       ) {
         e?.preventDefault();
         cursor.insAtRightEnd(prevBlock as MathBlock);
