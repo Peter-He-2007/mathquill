@@ -410,23 +410,29 @@
   // MODIFICATIONS START !!!!
 
   .mq-matrix-grid {
-    display: inline-flex;
-    flex-direction: row;
+    display: inline-grid;
     align-items: center;
+    align-content: center;
     vertical-align: middle;
+    gap: .2em .3em;
   }
 
   .mq-matrix-col {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 0.3em;
+    display: contents;  // ← key line
   }
 
   .mq-matrix-row {
     display: block;
     text-align: center;
-    padding: 0.1em 0;
+    padding: 0.1em 0.1em;
+  }
+
+  .mq-math-mode .mq-bracket-middle {
+    margin-top: .1em;
+    margin-bottom: .1em;
+    display: inline-flex;        // ← add this
+    align-items: center;         // ← add this
+    justify-content: center;     // ← add this
   }
 
   .mq-lim-operator {

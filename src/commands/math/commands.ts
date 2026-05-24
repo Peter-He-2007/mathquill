@@ -2004,7 +2004,6 @@ class Matrix extends Vector {
     var leftSymbol = SVG_SYMBOLS['['];
     var rightSymbol = SVG_SYMBOLS[']'];
 
-    // build each column span from matrixBlocks
     var colSpans = this.matrixBlocks.map(function (col) {
       var rowSpans = col.map(function (block) {
         return h.block('span', { class: 'mq-matrix-row' }, block);
@@ -2032,7 +2031,19 @@ class Matrix extends Vector {
             rightSymbol.width,
           class: 'mq-non-leaf mq-bracket-middle',
         },
-        [h('span', { class: 'mq-matrix-grid' }, colSpans)]
+        [
+          h(
+            'span',
+            {
+              class: 'mq-matrix-grid',
+              style:
+                'grid-template-columns:repeat(' +
+                this.matrixBlocks.length +
+                ',auto)',
+            },
+            colSpans
+          ),
+        ]
       ),
 
       h(
@@ -2215,7 +2226,10 @@ class Matrix extends Vector {
       return h.block('span', { class: 'mq-matrix-row' }, b);
     });
     var newColSpan = h('span', { class: 'mq-matrix-col' }, rowSpans);
-    var gridEl = this.domFrag().oneElement().querySelector('.mq-matrix-grid');
+    var gridEl = this.domFrag()
+      .oneElement()
+      .querySelector('.mq-matrix-grid') as HTMLElement;
+    gridEl.style.gridTemplateColumns = `repeat(${this.matrixBlocks.length}, auto)`;
     var colSpans = gridEl!.children;
     gridEl!.insertBefore(newColSpan, colSpans[colIndex + 1] || null);
 
@@ -2245,13 +2259,17 @@ class Matrix extends Vector {
     }
 
     // Step 3 — remove column span from DOM
-    var gridEl = this.domFrag().oneElement().querySelector('.mq-matrix-grid');
+    // TODO: fix this ...
+    var gridEl = this.domFrag()
+      .oneElement()
+      .querySelector('.mq-matrix-grid') as HTMLElement;
     var colSpans = gridEl!.children;
     gridEl!.removeChild(colSpans[colIndex]);
 
     // Step 4 — update matrixBlocks
     this.matrixBlocks.splice(colIndex, 1);
     this.cols -= 1;
+    gridEl.style.gridTemplateColumns = `repeat(${this.matrixBlocks.length}, auto)`;
 
     // Step 5 — sync this.blocks
     var flat: MathBlock[] = [];
