@@ -2,12 +2,20 @@
 
 var selectedSuggestionIndex: number = -1;
 
+const HIDDEN_SUGGESTIONS: Set<string> = new Set([
+  'left',
+  'right',
+  // add more here as needed
+]);
+
+const BLOCKED_COMMANDS: Set<string> = new Set(['left', 'right']);
+
 function getSuggestions(partial: string): string[] {
   if (!partial) return [];
   var allCommands: string[] = Object.keys(LatexCmds);
   return allCommands
     .filter(function (cmd: string) {
-      return cmd.indexOf(partial) === 0;
+      return cmd.indexOf(partial) === 0 && !HIDDEN_SUGGESTIONS.has(cmd);
     })
     .slice(0, 7);
 }
@@ -343,6 +351,19 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
     var latex: string = selectedCmd || this.getEnd(L).latex();
     if (!latex) latex = ' ';
     var cmd = LatexCmds[latex];
+
+    // MOD START !!!
+    if (BLOCKED_COMMANDS.has(latex)) {
+      const node = new TextBlock();
+      node.replaces(latex);
+      node.createLeftOf(cursor);
+      cursor.insRightOf(node);
+      if (this._replacedFragment) {
+        this._replacedFragment.remove();
+      }
+      return node;
+    }
+    // MOD END !!!
 
     if (cmd) {
       var node: MQNode;
