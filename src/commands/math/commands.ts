@@ -1944,8 +1944,6 @@ class Vector extends DelimsNode {
 
 LatexCmds.vect = LatexCmds.vector = Vector;
 
-//TODO: create matrix command...
-
 class Matrix extends Vector {
   ctrlSeq = '\\matrix';
   ariaLabel = 'matrix';
@@ -2343,7 +2341,6 @@ class Matrix extends Vector {
     });
   }
 
-  // TODO: Implement this
   removeMatrixRow(cursor: Cursor, rowIndex: number) {
     // don't remove if only one row left
     if (this.matrixBlocks[0].length <= 1) return;
