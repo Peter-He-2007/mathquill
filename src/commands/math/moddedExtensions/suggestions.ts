@@ -147,3 +147,91 @@ function showSuggestions(
   dropdown.style.left = rect.left + window.scrollX + 'px';
   dropdown.style.top = rect.bottom + window.scrollY + 4 + 'px';
 }
+
+// ─── KEYSTROKE HANDLERS ───────────────────────────────────────────────────────
+// these are called from LatexCommandInput.endsL.keystroke
+// returns true if the key was handled, false to fall through
+
+function handleSuggestionDown(e: KeyboardEvent | undefined): boolean {
+  var dropdown = document.getElementById('mq-suggestions');
+  if (dropdown && dropdown.children.length > 0) {
+    e?.preventDefault();
+    moveSuggestionDown();
+    return true;
+  }
+  return false;
+}
+
+function handleSuggestionUp(e: KeyboardEvent | undefined): boolean {
+  var dropdown = document.getElementById('mq-suggestions');
+  if (dropdown && dropdown.children.length > 0) {
+    e?.preventDefault();
+    moveSuggestionUp();
+    return true;
+  }
+  return false;
+}
+
+function handleSuggestionEscape(): boolean {
+  hideSuggestions();
+  return true;
+}
+
+function handleSuggestionBackspace(
+  latexCommandInput: any, // LatexCommandInput — any to avoid circular reference
+  ctrlr: Controller
+): void {
+  var current: string = latexCommandInput.getEnd(L).latex();
+  if (current.length <= 0) {
+    hideSuggestions();
+  } else {
+    var remaining = current.slice(0, -1);
+    showSuggestions(remaining, ctrlr.cursor, function (cmd: string): void {
+      latexCommandInput.renderCommand(ctrlr.cursor, cmd);
+    });
+  }
+  // always falls through — no return value
+}
+
+function handleSuggestionConfirm(
+  latexCommandInput: any,
+  ctrlr: Controller,
+  e: KeyboardEvent | undefined
+): boolean {
+  var selected: string | null = getSelectedSuggestion();
+  if (selected) {
+    e?.preventDefault();
+    hideSuggestions();
+    latexCommandInput.renderCommand(ctrlr.cursor, selected);
+    return true;
+  }
+
+  hideSuggestions();
+  var cmd = latexCommandInput.renderCommand(ctrlr.cursor);
+  ctrlr.aria.alert(cmd.mathspeak({ createdLeftOf: ctrlr.cursor }));
+  e?.preventDefault();
+  return true;
+}
+
+function handleSuggestionNumberKey(
+  key: string,
+  latexCommandInput: any,
+  ctrlr: Controller,
+  e: KeyboardEvent | undefined
+): boolean {
+  if (!key.match(/^[1-8]$/)) return false;
+  var dropdown = document.getElementById('mq-suggestions');
+  if (!dropdown || dropdown.children.length === 0) return false;
+
+  var index = parseInt(key) - 1;
+  var item = dropdown.children[index] as HTMLElement;
+  if (!item) return false;
+
+  var selectedCmd = item.getAttribute('data-cmd');
+  if (!selectedCmd) return false;
+
+  e?.preventDefault();
+  hideSuggestions();
+  latexCommandInput.renderCommand(ctrlr.cursor, selectedCmd);
+  return true;
+}

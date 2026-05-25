@@ -222,92 +222,31 @@ CharCmds['\\'] = class LatexCommandInput extends MathCommand {
       e: KeyboardEvent | undefined,
       ctrlr: Controller
     ): void {
+      var latexCommandInput = this.parent as LatexCommandInput;
+
       if (key === 'Down' || key === 'Tab') {
-        var dropdown = document.getElementById('mq-suggestions');
-        if (dropdown && dropdown.children.length > 0) {
-          e?.preventDefault();
-          moveSuggestionDown();
-          return;
-        }
+        if (handleSuggestionDown(e)) return;
       }
 
       if (key === 'Up' || key === 'Shift-Tab') {
-        var dropdown = document.getElementById('mq-suggestions');
-        if (dropdown && dropdown.children.length > 0) {
-          e?.preventDefault();
-          moveSuggestionUp();
-          return;
-        }
+        if (handleSuggestionUp(e)) return;
       }
 
       if (key === 'Escape') {
-        hideSuggestions();
+        handleSuggestionEscape();
         return;
       }
 
       if (key === 'Backspace') {
-        var current = (this.parent as LatexCommandInput).getEnd(L).latex();
-        if (current.length <= 0) {
-          // deleting the last character, so \ will be removed next
-          hideSuggestions();
-        } else {
-          // still has partial command, update suggestions with one less character
-          var self = this;
-          var remaining = current.slice(0, -1);
-          showSuggestions(
-            remaining,
-            ctrlr.cursor,
-            function (cmd: string): void {
-              (self.parent as LatexCommandInput).renderCommand(
-                ctrlr.cursor,
-                cmd
-              );
-            }
-          );
-        }
+        handleSuggestionBackspace(latexCommandInput, ctrlr);
         // fall through to default backspace handling
       }
 
       if (key === 'Enter' || key === 'Spacebar') {
-        var selected: string | null = getSelectedSuggestion();
-        if (selected) {
-          e?.preventDefault();
-          hideSuggestions();
-          (this.parent as LatexCommandInput).renderCommand(
-            ctrlr.cursor,
-            selected
-          );
-          return;
-        }
-
-        hideSuggestions();
-        var cmd = (this.parent as LatexCommandInput).renderCommand(
-          ctrlr.cursor
-        );
-        ctrlr.aria.alert(cmd.mathspeak({ createdLeftOf: ctrlr.cursor }));
-        e?.preventDefault();
-        return;
+        if (handleSuggestionConfirm(latexCommandInput, ctrlr, e)) return;
       }
 
-      if (key.match(/^[1-8]$/)) {
-        var dropdown = document.getElementById('mq-suggestions');
-        if (dropdown && dropdown.children.length > 0) {
-          var index = parseInt(key) - 1;
-          var item = dropdown.children[index] as HTMLElement;
-          if (item) {
-            e?.preventDefault();
-            var selectedCmd = item.getAttribute('data-cmd'); // ← renamed
-            if (selectedCmd) {
-              hideSuggestions();
-              (this.parent as LatexCommandInput).renderCommand(
-                ctrlr.cursor,
-                selectedCmd
-              );
-              return;
-            }
-          }
-        }
-      }
+      if (handleSuggestionNumberKey(key, latexCommandInput, ctrlr, e)) return;
 
       return originalKeystroke.call(this, key, e, ctrlr);
     };
