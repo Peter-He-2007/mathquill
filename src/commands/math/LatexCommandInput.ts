@@ -1,5 +1,5 @@
 // ─── SUGGESTION DROPDOWN ─────────────────────────────────────────────────────
-
+/*
 var selectedSuggestionIndex: number = -1;
 
 const HIDDEN_SUGGESTIONS: Set<string> = new Set([
@@ -148,7 +148,7 @@ function showSuggestions(
   dropdown.style.left = rect.left + window.scrollX + 'px';
   dropdown.style.top = rect.bottom + window.scrollY + 4 + 'px';
 }
-
+//*/
 // ─── LATEX COMMAND INPUT ─────────────────────────────────────────────────────
 
 CharCmds['\\'] = class LatexCommandInput extends MathCommand {
