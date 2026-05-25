@@ -1752,6 +1752,7 @@ LatexCmds.choose = class extends Binomial {
 
 //MODIFICATIONS START !!!!
 
+/*
 class Vector extends DelimsNode {
   ctrlSeq = '\\vect';
   ariaLabel = 'vector';
@@ -2327,6 +2328,7 @@ class Matrix extends Vector {
   }
 }
 
+
 class Pmatrix extends Matrix {
   html() {
     var leftSymbol = SVG_SYMBOLS['('];
@@ -2496,6 +2498,7 @@ LatexCmds.dmatrix =
   LatexCmds.vmat =
   LatexCmds.vmatrix =
     Dmatrix;
+//*/
 
 //MODIFICATIONS END !!!!
 
