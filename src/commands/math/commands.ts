@@ -2331,14 +2331,21 @@ class Pmatrix extends Matrix {
   html() {
     var leftSymbol = SVG_SYMBOLS['('];
     var rightSymbol = SVG_SYMBOLS[')'];
+    var self = this;
 
-    // build each column span from matrixBlocks
-    var colSpans = this.matrixBlocks.map(function (col) {
-      var rowSpans = col.map(function (block) {
-        return h.block('span', { class: 'mq-matrix-row' }, block);
-      });
-      return h('span', { class: 'mq-matrix-col' }, rowSpans);
-    });
+    // build cells in row-major order — matches CSS Grid layout
+    var cells: Element[] = [];
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        cells.push(
+          h.block(
+            'span',
+            { class: 'mq-matrix-cell' },
+            self.matrixBlocks[row][col]
+          )
+        );
+      }
+    }
 
     var el = h('span', { class: 'mq-non-leaf mq-bracket-container' }, [
       h(
@@ -2360,7 +2367,16 @@ class Pmatrix extends Matrix {
             rightSymbol.width,
           class: 'mq-non-leaf mq-bracket-middle',
         },
-        [h('span', { class: 'mq-matrix-grid' }, colSpans)]
+        [
+          h(
+            'span',
+            {
+              class: 'mq-matrix-grid',
+              style: 'grid-template-columns:repeat(' + this.cols + ',auto)',
+            },
+            cells
+          ),
+        ]
       ),
 
       h(
@@ -2378,27 +2394,15 @@ class Pmatrix extends Matrix {
     return el;
   }
 
-  latex() {
-    var self = this;
-    var rowCount = this.matrixBlocks[0].length;
-    var colCount = this.matrixBlocks.length;
-
+  latex(): string {
     var rows: string[] = [];
-
-    // iterate row by row
-    for (var row = 0; row < rowCount; row++) {
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
       var cols: string[] = [];
-
-      // iterate column by column within each row
-      for (var col = 0; col < colCount; col++) {
-        cols.push(self.matrixBlocks[col][row].latex());
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        cols.push(this.matrixBlocks[row][col].latex());
       }
-
-      // join columns with &
       rows.push(cols.join(' & '));
     }
-
-    // join rows with \\
     return '\\begin{pmatrix} ' + rows.join(' \\\\ ') + ' \\end{pmatrix}';
   }
 }
@@ -2407,14 +2411,21 @@ class Dmatrix extends Matrix {
   html() {
     var leftSymbol = SVG_SYMBOLS['|'];
     var rightSymbol = SVG_SYMBOLS['|'];
+    var self = this;
 
-    // build each column span from matrixBlocks
-    var colSpans = this.matrixBlocks.map(function (col) {
-      var rowSpans = col.map(function (block) {
-        return h.block('span', { class: 'mq-matrix-row' }, block);
-      });
-      return h('span', { class: 'mq-matrix-col' }, rowSpans);
-    });
+    // build cells in row-major order — matches CSS Grid layout
+    var cells: Element[] = [];
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        cells.push(
+          h.block(
+            'span',
+            { class: 'mq-matrix-cell' },
+            self.matrixBlocks[row][col]
+          )
+        );
+      }
+    }
 
     var el = h('span', { class: 'mq-non-leaf mq-bracket-container' }, [
       h(
@@ -2436,7 +2447,16 @@ class Dmatrix extends Matrix {
             rightSymbol.width,
           class: 'mq-non-leaf mq-bracket-middle',
         },
-        [h('span', { class: 'mq-matrix-grid' }, colSpans)]
+        [
+          h(
+            'span',
+            {
+              class: 'mq-matrix-grid',
+              style: 'grid-template-columns:repeat(' + this.cols + ',auto)',
+            },
+            cells
+          ),
+        ]
       ),
 
       h(
@@ -2454,28 +2474,16 @@ class Dmatrix extends Matrix {
     return el;
   }
 
-  latex() {
-    var self = this;
-    var rowCount = this.matrixBlocks[0].length;
-    var colCount = this.matrixBlocks.length;
-
+  latex(): string {
     var rows: string[] = [];
-
-    // iterate row by row
-    for (var row = 0; row < rowCount; row++) {
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
       var cols: string[] = [];
-
-      // iterate column by column within each row
-      for (var col = 0; col < colCount; col++) {
-        cols.push(self.matrixBlocks[col][row].latex());
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        cols.push(this.matrixBlocks[row][col].latex());
       }
-
-      // join columns with &
       rows.push(cols.join(' & '));
     }
-
-    // join rows with \\
-    return '\\begin{vmatrix} ' + rows.join(' \\\\ ') + ' \\end{vmatrix}';
+    return '\\begin{dmatrix} ' + rows.join(' \\\\ ') + ' \\end{dmatrix}';
   }
 }
 
