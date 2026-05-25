@@ -478,22 +478,6 @@ function getAllBlocks(root: MQNode): MathBlock[] {
   return blocks;
 }
 
-function getAllBlocksInOrder(root: MQNode): MathBlock[] {
-  var blocks: MathBlock[] = [];
-
-  function traverse(node: MQNode) {
-    if (node instanceof MathBlock) {
-      blocks.push(node as MathBlock);
-    }
-    node.eachChild(function (child: MQNode) {
-      traverse(child);
-      return undefined;
-    });
-  }
-
-  traverse(root);
-  return blocks;
-}
 // MOD END !!!
 
 class MathBlock extends MathElement {
@@ -577,102 +561,22 @@ class MathBlock extends MathElement {
     // }
     // MOD START!!!
     //*
+    var cursor = ctrlr.cursor;
+
     if (key === 'Spacebar' || key === 'Tab') {
-      e?.preventDefault();
-      var cursor = ctrlr.cursor;
-
-      // find the next MathCommand to the right of the cursor in the current block
-      var nextCmd: MQNode | 0 = cursor[R];
-      while (nextCmd && !(nextCmd instanceof MathCommand)) {
-        nextCmd = nextCmd[R];
-      }
-
-      // find the next MathBlock sibling of the current block
-      var currentBlock = cursor.parent;
-      var nextBlock: MQNode | 0 = currentBlock[R];
-      while (nextBlock && !(nextBlock instanceof MathBlock)) {
-        nextBlock = nextBlock[R];
-      }
-
-      if (!nextCmd && !nextBlock) {
-        // no more MathCommands or MathBlocks — exit to right of parent command
-        var parentCmd = currentBlock.parent;
-        if (parentCmd) {
-          cursor.insRightOf(parentCmd);
-        }
-      } else if (!nextCmd) {
-        // no more MathCommands but there is another MathBlock — go to it
-        cursor.insAtLeftEnd(nextBlock as MathBlock);
-      } else {
-        // there is a next MathCommand — go to its first MathBlock
-        var firstBlock = (nextCmd as MathCommand).getEnd(L);
-        if (firstBlock) {
-          cursor.insAtLeftEnd(firstBlock as MathBlock);
-        } else {
-          cursor.insRightOf(nextCmd as MQNode);
-        }
-      }
+      traverseForward(cursor, e);
       return;
     }
 
     if (key === 'Shift-Spacebar' || key === 'Shift-Tab') {
-      e?.preventDefault();
-      var cursor = ctrlr.cursor;
-
-      // find the previous MathCommand to the left of the cursor
-      var prevCmd: MQNode | 0 = cursor[L];
-      while (prevCmd && !(prevCmd instanceof MathCommand)) {
-        prevCmd = prevCmd[L];
-      }
-
-      // find the previous MathBlock sibling of the current block
-      var currentBlock = cursor.parent;
-      var prevBlock: MQNode | 0 = currentBlock[L];
-      while (prevBlock && !(prevBlock instanceof MathBlock)) {
-        prevBlock = prevBlock[L];
-      }
-
-      if (!prevCmd && !prevBlock) {
-        // no more MathCommands or MathBlocks — exit to left of parent command
-        var parentCmd = currentBlock.parent;
-        if (parentCmd) {
-          cursor.insLeftOf(parentCmd);
-        }
-      } else if (!prevCmd) {
-        // no more MathCommands but there is a previous MathBlock — go to it
-        cursor.insAtRightEnd(prevBlock as MathBlock);
-      } else {
-        // there is a previous MathCommand — go to its last MathBlock
-        var lastBlock = (prevCmd as MathCommand).getEnd(R);
-        if (lastBlock) {
-          cursor.insAtRightEnd(lastBlock as MathBlock);
-        } else {
-          cursor.insLeftOf(prevCmd as MQNode);
-        }
-      }
+      traverseBackward(cursor, e);
       return;
     }
 
-    // Handling backspace on a MathBlock that is empty that has a prev MathBlock
     if (key === 'Backspace') {
-      var cursor = ctrlr.cursor;
-      var currentBlock = cursor.parent;
-      var prevBlock: MQNode | 0 = currentBlock[L];
-
-      if (
-        prevBlock instanceof MathBlock && // there is a previous sibling block
-        currentBlock.isEmpty() && // current block is empty
-        !(currentBlock.parent instanceof SupSub)
-      ) {
-        e?.preventDefault();
-        cursor.insAtRightEnd(prevBlock as MathBlock);
-        return;
-      }
-      // fall through to default backspace handling if conditions not met
+      if (handleEmptyBlockBackspace(cursor, e)) return;
+      // fall through to default
     }
-
-    //*/
-    // MOD END !!!
     return super.keystroke(key, e, ctrlr);
   }
 
