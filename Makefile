@@ -54,9 +54,10 @@ SOURCES_FULL = \
   $(SRC_DIR)/commands/math/basicSymbols.ts \
   $(SRC_DIR)/commands/math/commands.ts \
   $(SRC_DIR)/commands/math/LatexCommandInput.ts \
+  $(SRC_DIR)/commands/math/moddedExtensions/limit.ts \
   $(SRC_DIR)/commands/math/moddedExtensions/matrix.ts \
   $(SRC_DIR)/commands/math/moddedExtensions/suggestions.ts \
-  $(SRC_DIR)/commands/math/moddedExtensions/traversal.ts
+  $(SRC_DIR)/commands/math/moddedExtensions/traversal.ts \
 
 
 SOURCES_BASIC = \
