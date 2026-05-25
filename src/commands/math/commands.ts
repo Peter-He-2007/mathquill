@@ -1949,67 +1949,113 @@ class Matrix extends Vector {
   ariaLabel = 'matrix';
   textTemplate = ['[', ',', ']'];
 
-  // number of columns
-  cols: number = 1;
-  rows: number = 1;
+  cols: number = 2;
+  rows: number = 2;
 
+  // ROW-MAJOR: matrixBlocks[row][col]
   matrixBlocks: Array<Array<MathBlock>> = [];
 
-  createBlocks() {
+  // ── helpers to get row/col from flat index ──────────────────────────────
+  getRowIndex(flatIndex: number): number {
+    return Math.floor(flatIndex / this.cols);
+  }
+  getColIndex(flatIndex: number): number {
+    return flatIndex % this.cols;
+  }
+
+  syncBlocks(): void {
+    var flat: MathBlock[] = [];
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        flat.push(this.matrixBlocks[row][col]);
+      }
+    }
+    this.blocks = flat;
+  }
+
+  readoptAll(): void {
+    // disown all
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        var b = this.matrixBlocks[row][col];
+        if (b.parent === this) b.disown();
+      }
+    }
+    // re-adopt in row-major order
+    var prev: MathBlock | 0 = 0;
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        var b = this.matrixBlocks[row][col];
+        b.adopt(this, prev, 0);
+        prev = b;
+      }
+    }
+  }
+
+  getGridEl(): HTMLElement {
+    return this.domFrag()
+      .oneElement()
+      .querySelector('.mq-matrix-grid') as HTMLElement;
+  }
+
+  updateGridColumns(): void {
+    this.getGridEl().style.gridTemplateColumns =
+      'repeat(' + this.cols + ', auto)';
+  }
+
+  // ── createBlocks ─────────────────────────────────────────────────────────
+  createBlocks(): void {
     this.matrixBlocks = [];
     this.blocks = [];
+    this.cols = 2;
+    this.rows = 2;
 
-    // create 2 columns, each with 2 rows
-    for (var col = 0; col < 2; col++) {
-      var column: MathBlock[] = [];
-      for (var row = 0; row < 2; row++) {
-        var newBlock = new MathBlock();
-        column.push(newBlock);
+    for (var row = 0; row < 2; row++) {
+      var rowArr: MathBlock[] = [];
+      for (var col = 0; col < 2; col++) {
+        rowArr.push(new MathBlock());
       }
-      this.matrixBlocks.push(column);
+      this.matrixBlocks.push(rowArr);
     }
 
-    // adopt all blocks in correct order
+    // adopt in row-major order
     var prev: MathBlock | 0 = 0;
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        var b = this.matrixBlocks[i][j];
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        var b = this.matrixBlocks[row][col];
         b.adopt(this, prev, 0);
         prev = b;
       }
     }
 
-    // sync this.blocks
-    var flat: MathBlock[] = [];
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        flat.push(this.matrixBlocks[i][j]);
+    this.syncBlocks();
+
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        this.wireBlock(this.matrixBlocks[row][col]);
       }
     }
-    this.blocks = flat;
-
-    // wire up all blocks
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        this.wireBlock(this.matrixBlocks[i][j]);
-      }
-    }
-
-    // set cols count
-    this.cols = 2;
-    this.rows = 2;
   }
 
+  // ── html ──────────────────────────────────────────────────────────────────
   html() {
     var leftSymbol = SVG_SYMBOLS['['];
     var rightSymbol = SVG_SYMBOLS[']'];
+    var self = this;
 
-    var colSpans = this.matrixBlocks.map(function (col) {
-      var rowSpans = col.map(function (block) {
-        return h.block('span', { class: 'mq-matrix-row' }, block);
-      });
-      return h('span', { class: 'mq-matrix-col' }, rowSpans);
-    });
+    // build cells in row-major order — matches CSS Grid layout
+    var cells: Element[] = [];
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        cells.push(
+          h.block(
+            'span',
+            { class: 'mq-matrix-cell' },
+            self.matrixBlocks[row][col]
+          )
+        );
+      }
+    }
 
     var el = h('span', { class: 'mq-non-leaf mq-bracket-container' }, [
       h(
@@ -2036,12 +2082,9 @@ class Matrix extends Vector {
             'span',
             {
               class: 'mq-matrix-grid',
-              style:
-                'grid-template-columns:repeat(' +
-                this.matrixBlocks.length +
-                ',auto)',
+              style: 'grid-template-columns:repeat(' + this.cols + ',auto)',
             },
-            colSpans
+            cells
           ),
         ]
       ),
@@ -2061,181 +2104,98 @@ class Matrix extends Vector {
     return el;
   }
 
-  // override wireBlock to add Shift-Enter and Shift-Backspace
-  wireBlock(block: MathBlock) {
+  // ── wireBlock ─────────────────────────────────────────────────────────────
+  wireBlock(block: MathBlock): void {
     var self = this;
-
-    // call Vector's wireBlock first to get all the existing behavior
-
-    // save reference to Vector's keystroke handler
     var vectorKeystroke = block.keystroke.bind(block);
 
-    // now wrap it with matrix-specific keys
     block.keystroke = function (
       key: string,
       e: KeyboardEvent,
       ctrlr: Controller
     ) {
       var cursor = ctrlr.cursor;
+      var flatIndex = self.blocks!.indexOf(block);
+      var rowIndex = self.getRowIndex(flatIndex);
+      var colIndex = self.getColIndex(flatIndex);
 
       if (key === 'Shift-Enter') {
         e.preventDefault();
-        var rowCount = self.matrixBlocks[0].length;
-        var flatIndex = self.blocks!.indexOf(block);
-        var colIndex = Math.floor(flatIndex / rowCount);
         self.addColumn(cursor, colIndex);
         return;
       }
-
       if (key === 'Shift-Backspace') {
         e.preventDefault();
-        var rowCount = self.matrixBlocks[0].length;
-        var flatIndex = self.blocks!.indexOf(block);
-        var colIndex = Math.floor(flatIndex / rowCount);
         self.removeColumn(cursor, colIndex);
         return;
       }
-
       if (key === 'Ctrl-Enter') {
         e.preventDefault();
-        var rowCount = self.matrixBlocks[0].length;
-        var flatIndex = self.blocks!.indexOf(block);
-        var rowIndex = flatIndex % rowCount;
         self.addMatrixRow(cursor, rowIndex);
         return;
       }
-
       if (key === 'Ctrl-Backspace') {
         e.preventDefault();
-        var rowCount = self.matrixBlocks[0].length;
-        var flatIndex = self.blocks!.indexOf(block);
-        var rowIndex = flatIndex % rowCount;
         self.removeMatrixRow(cursor, rowIndex);
         return;
       }
-
-      if (key === 'Right') {
-        var rowCount = self.matrixBlocks[0].length;
-        var flatIndex = self.blocks!.indexOf(block);
-        var colIndex = Math.floor(flatIndex / rowCount);
-        var rowIndex = flatIndex % rowCount;
-
-        if (colIndex < self.matrixBlocks.length - 1) {
-          // move to same row, next column
-          e.preventDefault();
-          cursor.insAtRightEnd(self.matrixBlocks[colIndex + 1][rowIndex]);
-          return;
-        }
-        // if last column, fall through to default — exits the matrix
+      if (key === 'Right' && colIndex < self.cols - 1) {
+        e.preventDefault();
+        cursor.insAtRightEnd(self.matrixBlocks[rowIndex][colIndex + 1]);
+        return;
+      }
+      if (key === 'Left' && colIndex > 0) {
+        e.preventDefault();
+        cursor.insAtRightEnd(self.matrixBlocks[rowIndex][colIndex - 1]);
+        return;
+      }
+      if (key === 'Down' && rowIndex < self.rows - 1) {
+        e.preventDefault();
+        cursor.insAtRightEnd(self.matrixBlocks[rowIndex + 1][colIndex]);
+        return;
+      }
+      if (key === 'Up' && rowIndex > 0) {
+        e.preventDefault();
+        cursor.insAtRightEnd(self.matrixBlocks[rowIndex - 1][colIndex]);
+        return;
       }
 
-      if (key === 'Left') {
-        var rowCount = self.matrixBlocks[0].length;
-        var flatIndex = self.blocks!.indexOf(block);
-        var colIndex = Math.floor(flatIndex / rowCount);
-        var rowIndex = flatIndex % rowCount;
-
-        if (colIndex > 0) {
-          e.preventDefault();
-          cursor.insAtRightEnd(self.matrixBlocks[colIndex - 1][rowIndex]);
-          return;
-        }
-        // if first column, fall through — exits the matrix
-      }
-
-      if (key === 'Down') {
-        var rowCount = self.matrixBlocks[0].length;
-        var flatIndex = self.blocks!.indexOf(block);
-        var colIndex = Math.floor(flatIndex / rowCount);
-        var rowIndex = flatIndex % rowCount;
-
-        if (rowIndex < rowCount - 1) {
-          e.preventDefault();
-          cursor.insAtRightEnd(self.matrixBlocks[colIndex][rowIndex + 1]);
-          return;
-        }
-        // if last row, fall through — exits the matrix downward
-      }
-
-      if (key === 'Up') {
-        var rowCount = self.matrixBlocks[0].length;
-        var flatIndex = self.blocks!.indexOf(block);
-        var colIndex = Math.floor(flatIndex / rowCount);
-        var rowIndex = flatIndex % rowCount;
-
-        if (rowIndex > 0) {
-          e.preventDefault();
-          cursor.insAtRightEnd(self.matrixBlocks[colIndex][rowIndex - 1]);
-          return;
-        }
-        // if first row, fall through — exits the matrix upward
-      }
-
-      // fall through to Vector's keystroke handler for everything else
       return vectorKeystroke(key, e, ctrlr);
     };
   }
 
-  addColumn(cursor: Cursor, colIndex: number) {
-    const columnLength = this.matrixBlocks[0].length;
-    var newColumn: Array<MathBlock> = [];
-
-    // Step 1 — create new blocks WITHOUT adopting yet
-    for (let i = 0; i < columnLength; i++) {
-      var newBlock = new MathBlock();
-      this.wireBlock(newBlock);
-      newColumn.push(newBlock);
+  // ── addColumn ─────────────────────────────────────────────────────────────
+  addColumn(cursor: Cursor, colIndex: number): void {
+    // Step 1 — create new blocks
+    var newCol: MathBlock[] = [];
+    for (var row = 0; row < this.rows; row++) {
+      var b = new MathBlock();
+      this.wireBlock(b);
+      newCol.push(b);
     }
 
-    // Step 2 — update matrixBlocks first
-    this.matrixBlocks.splice(colIndex + 1, 0, newColumn);
+    // Step 2 — insert into matrixBlocks
+    for (var row = 0; row < this.rows; row++) {
+      this.matrixBlocks[row].splice(colIndex + 1, 0, newCol[row]);
+    }
     this.cols += 1;
 
-    // Step 3 — disown ALL existing blocks from the tree
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        var b = this.matrixBlocks[i][j];
-        // only disown if currently adopted
-        if (b.parent === this) {
-          b.disown();
-        }
-      }
+    // Step 3 — readopt and sync
+    this.readoptAll();
+    this.syncBlocks();
+    this.updateGridColumns();
+
+    // Step 4 — insert cells into DOM in row-major order (reverse to preserve indices)
+    var gridEl = this.getGridEl();
+    for (var row = 0; row < this.rows; row++) {
+      var insertPos = row * this.cols + (colIndex + 1);
+      var newCell = h.block('span', { class: 'mq-matrix-cell' }, newCol[row]);
+      gridEl.insertBefore(newCell, gridEl.children[insertPos] || null);
     }
 
-    // Step 4 — re-adopt ALL blocks in the correct order
-    var prev: MathBlock | 0 = 0;
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        var b = this.matrixBlocks[i][j];
-        b.adopt(this, prev, 0);
-        prev = b;
-      }
-    }
-
-    // Step 5 — sync this.blocks
-    var flat: MathBlock[] = [];
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        flat.push(this.matrixBlocks[i][j]);
-      }
-    }
-    this.blocks = flat;
-
-    // Step 6 — update DOM
-    var rowSpans = newColumn.map(function (b) {
-      return h.block('span', { class: 'mq-matrix-row' }, b);
-    });
-    var newColSpan = h('span', { class: 'mq-matrix-col' }, rowSpans);
-    var gridEl = this.domFrag()
-      .oneElement()
-      .querySelector('.mq-matrix-grid') as HTMLElement;
-    gridEl.style.gridTemplateColumns = `repeat(${this.matrixBlocks.length}, auto)`;
-    var colSpans = gridEl!.children;
-    gridEl!.insertBefore(newColSpan, colSpans[colIndex + 1] || null);
-
-    // Step 7 — move cursor into new column
-    for (let i: number = newColumn.length - 1; i >= 0; i--) {
-      cursor.insAtRightEnd(newColumn[i]);
+    // Step 5 — move cursor into first cell of new column
+    for (var i = newCol.length - 1; i >= 0; i--) {
+      cursor.insAtRightEnd(newCol[i]);
     }
 
     this.bubble(function (node) {
@@ -2244,45 +2204,35 @@ class Matrix extends Vector {
     });
   }
 
-  removeColumn(cursor: Cursor, colIndex: number) {
-    const columnLength = this.matrixBlocks[0].length;
-    // don't remove if only one column left
+  // ── removeColumn ──────────────────────────────────────────────────────────
+  removeColumn(cursor: Cursor, colIndex: number): void {
     if (this.cols <= 1) return;
 
-    // Step 1 — get the column to remove
-    var removedColumn = this.matrixBlocks[colIndex];
-
-    // Step 2 — disown and remove DOM for each block in the column
-    for (var i = 0; i < removedColumn.length; i++) {
-      removedColumn[i].disown();
-      removedColumn[i].domFrag().oneElement().remove();
+    // Step 1 — disown blocks in this column
+    for (var row = 0; row < this.rows; row++) {
+      this.matrixBlocks[row][colIndex].disown();
     }
 
-    // Step 3 — remove column span from DOM
-    // TODO: fix this ...
-    var gridEl = this.domFrag()
-      .oneElement()
-      .querySelector('.mq-matrix-grid') as HTMLElement;
-    var colSpans = gridEl!.children;
-    gridEl!.removeChild(colSpans[colIndex]);
+    // Step 2 — remove cells from DOM in reverse row order (preserve indices)
+    var gridEl = this.getGridEl();
+    for (var row = this.rows - 1; row >= 0; row--) {
+      var removePos = row * this.cols + colIndex;
+      gridEl.removeChild(gridEl.children[removePos]);
+    }
 
-    // Step 4 — update matrixBlocks
-    this.matrixBlocks.splice(colIndex, 1);
+    // Step 3 — update matrixBlocks
+    for (var row = 0; row < this.rows; row++) {
+      this.matrixBlocks[row].splice(colIndex, 1);
+    }
     this.cols -= 1;
-    gridEl.style.gridTemplateColumns = `repeat(${this.matrixBlocks.length}, auto)`;
 
-    // Step 5 — sync this.blocks
-    var flat: MathBlock[] = [];
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        flat.push(this.matrixBlocks[i][j]);
-      }
-    }
-    this.blocks = flat;
+    // Step 4 — sync and update grid
+    this.syncBlocks();
+    this.updateGridColumns();
 
-    // Step 6 — move cursor to nearest column
-    var targetColIndex = Math.max(0, colIndex - 1);
-    cursor.insAtRightEnd(this.matrixBlocks[targetColIndex][columnLength - 1]);
+    // Step 5 — move cursor
+    var targetCol = Math.max(0, colIndex - 1);
+    cursor.insAtRightEnd(this.matrixBlocks[0][targetCol]);
 
     this.bubble(function (node) {
       node.reflow();
@@ -2290,66 +2240,37 @@ class Matrix extends Vector {
     });
   }
 
-  addMatrixRow(cursor: Cursor, rowIndex: number) {
-    const rowLength = this.matrixBlocks.length;
-    var newRow: Array<MathBlock> = [];
-
-    // Step 1 — create new blocks WITHOUT adopting yet
-    for (let i = 0; i < rowLength; i++) {
-      var newBlock = new MathBlock();
-      this.wireBlock(newBlock);
-      newRow.push(newBlock);
+  // ── addMatrixRow ──────────────────────────────────────────────────────────
+  addMatrixRow(cursor: Cursor, rowIndex: number): void {
+    // Step 1 — create new blocks
+    var newRow: MathBlock[] = [];
+    for (var col = 0; col < this.cols; col++) {
+      var b = new MathBlock();
+      this.wireBlock(b);
+      newRow.push(b);
     }
 
-    // Step 2 — update matrixBlocks first
-    for (let i = 0; i < rowLength; i++) {
-      this.matrixBlocks[i].splice(rowIndex + 1, 0, newRow[i]);
-    }
+    // Step 2 — insert into matrixBlocks
+    this.matrixBlocks.splice(rowIndex + 1, 0, newRow);
     this.rows += 1;
 
-    // Step 3 — disown ALL existing blocks from the tree
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        var b = this.matrixBlocks[i][j];
-        // only disown if currently adopted
-        if (b.parent === this) {
-          b.disown();
-        }
-      }
+    // Step 3 — readopt and sync
+    this.readoptAll();
+    this.syncBlocks();
+
+    // Step 4 — insert cells into DOM
+    var gridEl = this.getGridEl();
+    var insertStartPos = (rowIndex + 1) * this.cols;
+    for (var col = 0; col < this.cols; col++) {
+      var newCell = h.block('span', { class: 'mq-matrix-cell' }, newRow[col]);
+      gridEl.insertBefore(
+        newCell,
+        gridEl.children[insertStartPos + col] || null
+      );
     }
 
-    // Step 4 — re-adopt ALL blocks in the correct order
-    var prev: MathBlock | 0 = 0;
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        var b = this.matrixBlocks[i][j];
-        b.adopt(this, prev, 0);
-        prev = b;
-      }
-    }
-
-    // Step 5 — sync this.blocks
-    var flat: MathBlock[] = [];
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        flat.push(this.matrixBlocks[i][j]);
-      }
-    }
-    this.blocks = flat;
-
-    // Step 6 — update DOM
-    var gridEl = this.domFrag().oneElement().querySelector('.mq-matrix-grid');
-    var colSpans = gridEl!.children;
-
-    // for each column, insert a new row span at rowIndex + 1
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      var newRowSpan = h.block('span', { class: 'mq-matrix-row' }, newRow[i]);
-      var existingRows = colSpans[i].children;
-      colSpans[i].insertBefore(newRowSpan, existingRows[rowIndex + 1] || null);
-    }
-
-    // Step 7 — move cursor into first cell of new row
-    for (let i: number = newRow.length - 1; i >= 0; i--) {
+    // Step 5 — move cursor into first cell of new row
+    for (var i = newRow.length - 1; i >= 0; i--) {
       cursor.insAtRightEnd(newRow[i]);
     }
 
@@ -2359,41 +2280,32 @@ class Matrix extends Vector {
     });
   }
 
-  removeMatrixRow(cursor: Cursor, rowIndex: number) {
-    // don't remove if only one row left
-    if (this.matrixBlocks[0].length <= 1) return;
+  // ── removeMatrixRow ───────────────────────────────────────────────────────
+  removeMatrixRow(cursor: Cursor, rowIndex: number): void {
+    if (this.rows <= 1) return;
 
-    // Step 1 — disown each block in the row
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      this.matrixBlocks[i][rowIndex].disown();
+    // Step 1 — disown blocks in this row
+    for (var col = 0; col < this.cols; col++) {
+      this.matrixBlocks[rowIndex][col].disown();
     }
 
-    // Step 2 — remove row spans from DOM
-    var gridEl = this.domFrag().oneElement().querySelector('.mq-matrix-grid');
-    var colSpans = gridEl!.children;
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      var existingRows = colSpans[i].children;
-      colSpans[i].removeChild(existingRows[rowIndex]);
+    // Step 2 — remove cells from DOM
+    var gridEl = this.getGridEl();
+    var removeStartPos = rowIndex * this.cols;
+    for (var col = this.cols - 1; col >= 0; col--) {
+      gridEl.removeChild(gridEl.children[removeStartPos + col]);
     }
 
     // Step 3 — update matrixBlocks
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      this.matrixBlocks[i].splice(rowIndex, 1);
-    }
+    this.matrixBlocks.splice(rowIndex, 1);
     this.rows -= 1;
 
-    // Step 4 — sync this.blocks
-    var flat: MathBlock[] = [];
-    for (var i = 0; i < this.matrixBlocks.length; i++) {
-      for (var j = 0; j < this.matrixBlocks[i].length; j++) {
-        flat.push(this.matrixBlocks[i][j]);
-      }
-    }
-    this.blocks = flat;
+    // Step 4 — sync
+    this.syncBlocks();
 
-    // Step 5 — move cursor to nearest row, same column
-    var targetRowIndex = Math.max(0, rowIndex - 1);
-    cursor.insAtRightEnd(this.matrixBlocks[0][targetRowIndex]);
+    // Step 5 — move cursor
+    var targetRow = Math.max(0, rowIndex - 1);
+    cursor.insAtRightEnd(this.matrixBlocks[targetRow][0]);
 
     this.bubble(function (node) {
       node.reflow();
@@ -2401,27 +2313,16 @@ class Matrix extends Vector {
     });
   }
 
-  latex() {
-    var self = this;
-    var rowCount = this.matrixBlocks[0].length;
-    var colCount = this.matrixBlocks.length;
-
+  // ── latex ─────────────────────────────────────────────────────────────────
+  latex(): string {
     var rows: string[] = [];
-
-    // iterate row by row
-    for (var row = 0; row < rowCount; row++) {
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
       var cols: string[] = [];
-
-      // iterate column by column within each row
-      for (var col = 0; col < colCount; col++) {
-        cols.push(self.matrixBlocks[col][row].latex());
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        cols.push(this.matrixBlocks[row][col].latex());
       }
-
-      // join columns with &
       rows.push(cols.join(' & '));
     }
-
-    // join rows with \\
     return '\\begin{bmatrix} ' + rows.join(' \\\\ ') + ' \\end{bmatrix}';
   }
 }
