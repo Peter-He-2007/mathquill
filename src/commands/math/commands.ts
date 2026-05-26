@@ -838,7 +838,9 @@ LatexCmds['∫'] =
               h('span', { class: 'mq-sup' }, [
                 h.block('span', { class: 'mq-sup-inner' }, blocks[1]),
               ]),
-              h.block('span', { class: 'mq-sub' }, blocks[0]),
+              h('span', { class: 'mq-sub' }, [
+                h.block('span', { class: 'mq-sub-inner' }, blocks[0]),
+              ]),
               h('span', { style: 'display:inline-block;width:0' }, [
                 h.text(U_ZERO_WIDTH_SPACE),
               ]),

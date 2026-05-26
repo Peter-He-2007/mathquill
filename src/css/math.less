@@ -414,18 +414,25 @@
       > .mq-sub {
         //margin-left: -.35em;
         margin-left: -.4em;
+      
+        > .mq-sub-inner {
+        display: block;  // match mq-sub's existing display behavior
+        }
       }
     }
   }
 
   .mq-int {
-    .mq-sub:has(> .mq-empty) { // TODO: FIX THIS ...
+    .mq-sub:has(> .mq-sub-inner.mq-empty) {        // ← .mq-sub IS the empty block
       display: none;
     }
-    .mq-sup:has(> .mq-empty) {
+    .mq-sup:has(> .mq-sup-inner.mq-empty) {  // ← .mq-sup-inner is the block
       display: none;
     }
-  }  
+    .mq-supsub:has(> .mq-sup > .mq-sup-inner.mq-empty):has(> .mq-sub > .mq-sub-inner.mq-empty) {
+      display: none;
+    }    
+  }
 
   .mq-matrix-grid {
     display: inline-grid;

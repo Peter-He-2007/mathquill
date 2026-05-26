@@ -462,7 +462,7 @@ LatexCmds.square = bindVanillaSymbol('\\square ', '&#11036;', 'square');
 
 //variable-sized
 // TODO: make all of these larger...
-LatexCmds.oint = bindVanillaSymbol('\\oint ', '&#8750;', 'o int');
+// OG CODE LatexCmds.oint = bindVanillaSymbol('\\oint ', '&#8750;', 'o int');
 LatexCmds.bigcap = bindVanillaSymbol('\\bigcap ', '&#8745;', 'big cap');
 LatexCmds.bigcup = bindVanillaSymbol('\\bigcup ', '&#8746;', 'big cup');
 LatexCmds.bigsqcup = bindVanillaSymbol(
