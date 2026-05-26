@@ -685,7 +685,28 @@ LatexCmds.superscript =
       }
     };
 
-class SummationNotation extends MathCommand {
+class LargeOperator extends MathCommand {
+  handleCursorInput(cursor: Cursor, ch: string): boolean {
+    if (cursor[L] !== this) {
+      return false;
+    }
+
+    if (ch === '_') {
+      cursor.insAtRightEnd(this.blocks![0]);
+      return true;
+    }
+
+    if (ch === '^') {
+      cursor.insAtRightEnd(this.blocks![1]);
+      return true;
+    }
+
+    return false;
+  }
+}
+
+class SummationNotation extends LargeOperator {
+  // MODDED LINE !!! changed MathCommand to LargeOperator
   constructor(ch: string, symbol: string, ariaLabel?: string) {
     super();
 
@@ -812,7 +833,6 @@ LatexCmds['∫'] =
         this.ariaLabel = 'integral';
         this.domView = new DOMView(2, (blocks) =>
           h('span', { class: 'mq-int mq-non-leaf' }, [
-            //modified line
             h('big', {}, [h.text(U_INTEGRAL)]),
             h('span', { class: 'mq-supsub mq-non-leaf' }, [
               h('span', { class: 'mq-sup' }, [
@@ -1555,21 +1575,6 @@ CharCmds['|'] = () => new Bracket(L, '|', '|', '|', '|');
 // OG CODE LatexCmds.rvert = () =>
 // OG CODE   new Bracket(R, '&#8741;', '&#8741;', '\\lvert ', '\\rvert ');
 
-// MODIFICATIONS START!!!
-
-// LatexCmds.lfloor = () =>
-//   new Bracket(L, '&lfloor;', '&rfloor;', '\\lfloor ', '\\rfloor ');
-// LatexCmds.rfloor = () =>
-//   new Bracket(R, '&lfloor;', '&rfloor;', '\\lfloor ', '\\rfloor ');
-// LatexCmds.lceil = () =>
-//   new Bracket(L, '&lceil', '&rceil', '\\lceil ', '\\rceil ');
-// LatexCmds.rceil = () =>
-//   new Bracket(R, '&lceil', '&rceil', '\\lceil ', '\\rceil ');
-
-// LatexCmds.lvert = () => new Bracket(L, '|', '|', '\\lvert ', '\\rvert ');
-// LatexCmds.rvert = () => new Bracket(R, '|', '|', '\\lvert ', '\\rvert ');
-
-// MODIFICATIONS END!!!
 //* What is the point of this ? OG CODE ...
 LatexCmds.left = class extends MathCommand {
   parser() {

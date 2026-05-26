@@ -319,6 +319,12 @@ class MathCommand extends MathElement {
       }
     );
   }
+
+  // MOD START !!!
+  handleCursorInput(_cursor: Cursor, _ch: string): boolean {
+    return false;
+  }
+  // MOD END !!!
 }
 
 /**
@@ -644,6 +650,19 @@ class MathBlock extends MathElement {
     } else return new VanillaSymbol(ch);
   }
   write(cursor: Cursor, ch: string) {
+    // MOD START !!!
+    var left = cursor[L];
+    var right = cursor[R];
+
+    if (left instanceof MathCommand && left.handleCursorInput(cursor, ch)) {
+      return;
+    }
+
+    if (right instanceof MathCommand && right.handleCursorInput(cursor, ch)) {
+      return;
+    }
+    // MOD END !!!
+
     var cmd = this.chToCmd(ch, cursor.options);
     if (cursor.selection) cmd.replaces(cursor.replaceSelection());
     if (!cursor.isTooDeep()) {
