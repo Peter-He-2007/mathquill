@@ -796,26 +796,6 @@ class SummationNotation extends LargeOperator {
     endsR.downOutOf = endsL;
   }
 }
-// MODIFICATIONS START HERE!!!!
-
-class IndefiniteIntegral extends MQSymbol {
-  constructor() {
-    super(
-      '\\int ',
-      h('span', { class: 'mq-int mq-non-leaf' }, [
-        h('big', {}, [h.text(U_INTEGRAL)]),
-      ]),
-      'integral'
-    );
-  }
-}
-
-LatexCmds.iint =
-  LatexCmds.indefint =
-  LatexCmds.indefintegral =
-    () => new IndefiniteIntegral();
-
-// MODIFICATIONS END HERE!!!!
 
 LatexCmds['∑'] =
   LatexCmds.sum =
@@ -1007,7 +987,7 @@ var LiveFraction =
                 leftward instanceof (LatexCmds.text || noop) ||
                 leftward instanceof SummationNotation ||
                 // MODIFICATIONS START !!!
-                leftward instanceof IndefiniteIntegral ||
+                leftward instanceof LargeMQSymbol ||
                 // MODIFICATIONS END !!!
                 leftward.ctrlSeq === '\\ ' ||
                 /^[,;:]$/.test(leftward.ctrlSeq as string)

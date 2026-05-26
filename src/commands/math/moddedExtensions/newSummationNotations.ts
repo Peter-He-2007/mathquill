@@ -1,4 +1,16 @@
-LatexCmds.oint = bindVanillaSymbol('\\oint ', '&#8750;', 'o int');
+class LargeMQSymbol extends MQSymbol {
+  constructor(ch: string, symbol: string) {
+    super(
+      ch,
+      h('span', { class: 'mq-int mq-non-leaf' }, [
+        h('big', {}, [h.text(symbol)]),
+      ]),
+      'integral'
+    );
+  }
+}
 
-LatexCmds['∳'] = LatexCmds.oint = () =>
-  new SummationNotation('\\oint ', U_OINT, 'o int'); // TODO: design special class for \oint ...
+LatexCmds['∳'] =
+  LatexCmds.oint =
+  LatexCmds.contourintegral =
+    () => new LargeMQSymbol('\\oint ', U_OINT);
