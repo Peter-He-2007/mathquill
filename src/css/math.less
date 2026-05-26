@@ -386,6 +386,15 @@
 
   // MODIFICATIONS START !!!!
 
+  .mq-large-operator {
+    .mq-from:has(> .mq-empty) {
+      display: none;
+    }
+    .mq-to:has(> .mq-empty) {
+      display: none;
+    }
+  }
+
   .mq-int {
     > big {
       display: inline-block;
@@ -409,14 +418,14 @@
     }
   }
 
-  .mq-large-operator {
-    .mq-from:has(> .mq-empty) {
+  .mq-int {
+    .mq-sub:has(> .mq-empty) { // TODO: FIX THIS ...
       display: none;
     }
-    .mq-to:has(> .mq-empty) {
+    .mq-sup:has(> .mq-empty) {
       display: none;
     }
-  }
+  }  
 
   .mq-matrix-grid {
     display: inline-grid;
