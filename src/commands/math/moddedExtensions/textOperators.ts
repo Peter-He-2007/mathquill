@@ -80,3 +80,41 @@ class LimitNotation extends MathCommand {
 
 LatexCmds.lim = LatexCmds.limit = () =>
   new LimitNotation('\\lim ', 'lim', 'limit');
+
+LatexCmds.limsup = () =>
+  new LimitNotation('\\limsup ', 'limsup', 'limit superior');
+
+LatexCmds.liminf = () =>
+  new LimitNotation('\\liminf ', 'liminf', 'limit inferior');
+
+LatexCmds.max = () => new LimitNotation('\\max ', 'max', 'maximum');
+
+LatexCmds.min = () => new LimitNotation('\\min ', 'min', 'minimum');
+
+LatexCmds.sup = () => new LimitNotation('\\sup ', 'sup', 'supremum');
+
+LatexCmds.inf = () => new LimitNotation('\\inf ', 'inf', 'infimum');
+
+LatexCmds.Pr = () => new LimitNotation('\\Pr ', 'Pr', 'probability');
+
+LatexCmds.det = () => new LimitNotation('\\det ', 'det', 'determinant');
+
+class ArgNotation extends LimitNotation {
+  latex(): string {
+    function simplify(latex: string) {
+      return '{' + (latex || ' ') + '}';
+    }
+    return (
+      '\\operatorname{' +
+      this.ctrlSeq!.trim().replace(/^\\/, '') +
+      '}' +
+      '_' +
+      simplify(this.getEnd(L).latex())
+    );
+  }
+}
+
+LatexCmds.argmax = () =>
+  new ArgNotation('\\argmax ', 'argmax', 'argument maximum');
+LatexCmds.argmin = () =>
+  new ArgNotation('\\argmin ', 'argmin', 'argument minimum');
