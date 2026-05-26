@@ -13,4 +13,10 @@ class LargeMQSymbol extends MQSymbol {
 LatexCmds['∳'] =
   LatexCmds.oint =
   LatexCmds.contourintegral =
-    () => new LargeMQSymbol('\\oint ', U_OINT);
+    () => new IntegralNotation('\\oint ', U_OINT, 'contour integral');
+
+LatexCmds['∬'] = LatexCmds.iint = () =>
+  new IntegralNotation('\\iint ', U_IINT, 'double integral');
+
+LatexCmds['∭'] = LatexCmds.iiint = () =>
+  new IntegralNotation('\\iiint ', U_IIINT, 'triple integral');

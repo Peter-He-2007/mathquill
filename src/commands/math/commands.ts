@@ -685,6 +685,7 @@ LatexCmds.superscript =
       }
     };
 
+// MOD START !!!
 class LargeOperator extends MathCommand {
   handleCursorInput(cursor: Cursor, ch: string): boolean {
     if (cursor[L] !== this) {
@@ -704,6 +705,7 @@ class LargeOperator extends MathCommand {
     return false;
   }
 }
+// MOD END !!!
 
 class SummationNotation extends LargeOperator {
   // MODDED LINE !!! changed MathCommand to LargeOperator
@@ -807,40 +809,48 @@ LatexCmds['∏'] =
   LatexCmds.product =
     () => new SummationNotation('\\prod ', U_NARY_PRODUCT, 'product');
 
-LatexCmds.coprod = LatexCmds.coproduct = () =>
-  new SummationNotation('\\coprod ', U_NARY_COPRODUCT, 'co product');
+LatexCmds['∐'] =
+  LatexCmds.coprod =
+  LatexCmds.coproduct =
+    () => new SummationNotation('\\coprod ', U_NARY_COPRODUCT, 'co product');
+
+// MOD START !!!
+
+class IntegralNotation extends SummationNotation {
+  constructor(ch: string, symbol: string, ariaLabel?: string) {
+    super(ch, '', ariaLabel);
+
+    this.ariaLabel = 'integral';
+    this.domView = new DOMView(2, (blocks) =>
+      h('span', { class: 'mq-int mq-non-leaf' }, [
+        h('big', {}, [h.text(symbol)]),
+        h('span', { class: 'mq-supsub mq-non-leaf' }, [
+          h('span', { class: 'mq-sup' }, [
+            h.block('span', { class: 'mq-sup-inner' }, blocks[1]),
+          ]),
+          h('span', { class: 'mq-sub' }, [
+            h.block('span', { class: 'mq-sub-inner' }, blocks[0]),
+          ]),
+          h('span', { style: 'display:inline-block;width:0' }, [
+            h.text(U_ZERO_WIDTH_SPACE),
+          ]),
+        ]),
+      ])
+    );
+  }
+
+  createLeftOf(cursor: Cursor) {
+    // FIXME: refactor rather than overriding
+    MathCommand.prototype.createLeftOf.call(this, cursor);
+  }
+}
+
+// MOD END !!!
 
 LatexCmds['∫'] =
   LatexCmds['int'] =
   LatexCmds.integral =
-    class extends SummationNotation {
-      constructor() {
-        super('\\int ', '', 'integral');
-
-        this.ariaLabel = 'integral';
-        this.domView = new DOMView(2, (blocks) =>
-          h('span', { class: 'mq-int mq-non-leaf' }, [
-            h('big', {}, [h.text(U_INTEGRAL)]),
-            h('span', { class: 'mq-supsub mq-non-leaf' }, [
-              h('span', { class: 'mq-sup' }, [
-                h.block('span', { class: 'mq-sup-inner' }, blocks[1]),
-              ]),
-              h('span', { class: 'mq-sub' }, [
-                h.block('span', { class: 'mq-sub-inner' }, blocks[0]),
-              ]),
-              h('span', { style: 'display:inline-block;width:0' }, [
-                h.text(U_ZERO_WIDTH_SPACE),
-              ]),
-            ]),
-          ])
-        );
-      }
-
-      createLeftOf(cursor: Cursor) {
-        // FIXME: refactor rather than overriding
-        MathCommand.prototype.createLeftOf.call(this, cursor);
-      }
-    };
+    () => new IntegralNotation('\\int ', U_INTEGRAL, 'integral');
 var Fraction =
   (LatexCmds.frac =
   LatexCmds.dfrac =

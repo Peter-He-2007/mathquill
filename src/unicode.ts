@@ -9,3 +9,5 @@ const U_INTEGRAL = '\u222B';
 // MOD START !!!
 
 const U_OINT = '\u222E';
+const U_IINT = '\u222C';
+const U_IIINT = '\u222D';
