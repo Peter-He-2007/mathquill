@@ -803,6 +803,7 @@ LatexCmds['∫'] =
         this.ariaLabel = 'integral';
         this.domView = new DOMView(2, (blocks) =>
           h('span', { class: 'mq-int mq-non-leaf' }, [
+            //modified line
             h('big', {}, [h.text(U_INTEGRAL)]),
             h('span', { class: 'mq-supsub mq-non-leaf' }, [
               h('span', { class: 'mq-sup' }, [

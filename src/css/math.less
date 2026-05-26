@@ -147,29 +147,6 @@
     font-size: 200%;
   }
 
-  .mq-int {
-    > big {
-      display: inline-block;
-      .transform(scaleX(.7));
-      vertical-align: -.16em;
-    }
-
-    > .mq-supsub {
-      font-size: 80%;
-      vertical-align: -1.1em;
-      padding-right: .2em;
-
-      > .mq-sup > .mq-sup-inner {
-        vertical-align: 1.3em;
-      }
-
-      > .mq-sub {
-        //margin-left: -.35em;
-        margin-left: -.4em;
-      }
-    }
-  }
-
   .mq-roman {
     font-style: normal;
   }
@@ -408,6 +385,49 @@
   }
 
   // MODIFICATIONS START !!!!
+
+  .mq-int {
+    > big {
+      display: inline-block;
+      .transform(scaleX(.7));
+      vertical-align: -.16em;
+    }
+
+    > .mq-supsub {
+      font-size: 80%;
+      vertical-align: -1.1em;
+      padding-right: .2em;
+
+      > .mq-sup > .mq-sup-inner {
+        vertical-align: 1.3em;
+      }
+
+      > .mq-sub {
+        //margin-left: -.35em;
+        margin-left: -.4em;
+      }
+    }
+  }
+
+  // MODDED START !!!
+
+  /*
+  // when \int is nested inside a large operator block, reduce the offset
+  .mq-large-operator .mq-int {
+    > .mq-supsub {
+      //vertical-align: -1.1em;  // ← much less aggressive than -1.1em
+      vertical-align: -1.1em;
+
+      > .mq-sup > .mq-sup-inner {
+        //vertical-align: 1.3em;  // ← also reduce this
+        vertical-align: -2.3em;
+      }
+    }
+  }
+  //*/
+
+  // MODDED END !!!
+
 
   .mq-matrix-grid {
     display: inline-grid;
