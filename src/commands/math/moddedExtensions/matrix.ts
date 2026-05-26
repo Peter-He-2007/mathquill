@@ -733,9 +733,90 @@ class Dmatrix extends Matrix {
   }
 }
 
+class PlainMatrix extends Matrix {
+  html() {
+    var leftSymbol = SVG_SYMBOLS[' '];
+    var rightSymbol = SVG_SYMBOLS[' '];
+    var self = this;
+
+    // build cells in row-major order — matches CSS Grid layout
+    var cells: Element[] = [];
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        cells.push(
+          h.block(
+            'span',
+            { class: 'mq-matrix-cell' },
+            self.matrixBlocks[row][col]
+          )
+        );
+      }
+    }
+
+    var el = h('span', { class: 'mq-non-leaf mq-bracket-container' }, [
+      h(
+        'span',
+        {
+          style: 'width:' + leftSymbol.width,
+          class: 'mq-paren mq-bracket-l mq-scaled',
+        },
+        [leftSymbol.html()]
+      ),
+
+      h(
+        'span',
+        {
+          style:
+            'margin-left:' +
+            leftSymbol.width +
+            ';margin-right:' +
+            rightSymbol.width,
+          class: 'mq-non-leaf mq-bracket-middle',
+        },
+        [
+          h(
+            'span',
+            {
+              class: 'mq-matrix-grid',
+              style: 'grid-template-columns:repeat(' + this.cols + ',auto)',
+            },
+            cells
+          ),
+        ]
+      ),
+
+      h(
+        'span',
+        {
+          style: 'width:' + rightSymbol.width,
+          class: 'mq-paren mq-bracket-r mq-scaled',
+        },
+        [rightSymbol.html()]
+      ),
+    ]);
+
+    this.setDOM(el);
+    NodeBase.linkElementByCmdNode(el, this);
+    return el;
+  }
+
+  latex(): string {
+    var rows: string[] = [];
+    for (var row = 0; row < this.matrixBlocks.length; row++) {
+      var cols: string[] = [];
+      for (var col = 0; col < this.matrixBlocks[row].length; col++) {
+        cols.push(this.matrixBlocks[row][col].latex());
+      }
+      rows.push(cols.join(' & '));
+    }
+    return '\\begin{dmatrix} ' + rows.join(' \\\\ ') + ' \\end{dmatrix}';
+  }
+}
+
 LatexCmds.matrix = LatexCmds.mat = Matrix;
 LatexCmds.bmatrix = LatexCmds.bmat = Matrix;
 LatexCmds.pmatrix = LatexCmds.pmat = Pmatrix;
+LatexCmds.matrixplain = PlainMatrix;
 LatexCmds.dmatrix =
   LatexCmds.dmat =
   LatexCmds.determinatematrix =
