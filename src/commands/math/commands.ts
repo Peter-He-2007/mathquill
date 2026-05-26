@@ -728,6 +728,13 @@ class SummationNotation extends LargeOperator {
       new Equality().createLeftOf(cursor);
     }
   }
+
+  // MOD START !!!
+  placeCursor(cursor: Cursor): void {
+    cursor.insRightOf(this);
+  }
+  // MOD END !!!
+
   latex() {
     function simplify(latex: string) {
       return '{' + (latex || ' ') + '}';
