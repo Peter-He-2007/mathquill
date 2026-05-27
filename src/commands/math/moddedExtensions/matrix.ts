@@ -1,3 +1,6 @@
+/**********************************************************************/
+/* Matrix Commands ****************************************************/
+
 class Vector extends DelimsNode {
   ctrlSeq = '\\vect';
   ariaLabel = 'vector';
@@ -570,6 +573,79 @@ class Matrix extends Vector {
       rows.push(cols.join(' & '));
     }
     return '\\begin{bmatrix} ' + rows.join(' \\\\ ') + ' \\end{bmatrix}';
+  }
+
+  parser() {
+    var optWhitespace = Parser.optWhitespace;
+    //var succeed = Parser.succeed;
+    var block = latexMathParser.block;
+    var regex = Parser.regex;
+    var string = Parser.string;
+
+    var self = this;
+
+    // parse {rowCount}{colCount}{cell1}{cell2}...
+    return optWhitespace
+      .then(string('{'))
+      .then(regex(/^\d+/))
+      .skip(string('}'))
+      .then(function (rowStr: string) {
+        var rowCount = parseInt(rowStr);
+        return string('{')
+          .then(regex(/^\d+/))
+          .skip(string('}'))
+          .then(function (colStr: string) {
+            var colCount = parseInt(colStr);
+            var totalCells = rowCount * colCount;
+
+            // parse that many blocks
+            return block
+              .times(totalCells)
+              .map(function (cellBlocks: MathBlock[]) {
+                // rebuild matrixBlocks in row-major order
+                self.matrixBlocks = [];
+                self.rows = rowCount;
+                self.cols = colCount;
+
+                for (var row = 0; row < rowCount; row++) {
+                  var rowArr: MathBlock[] = [];
+                  for (var col = 0; col < colCount; col++) {
+                    rowArr.push(cellBlocks[row * colCount + col]);
+                  }
+                  self.matrixBlocks.push(rowArr);
+                }
+
+                // adopt all blocks
+                var prev: MathBlock | 0 = 0;
+                for (var row = 0; row < self.matrixBlocks.length; row++) {
+                  for (
+                    var col = 0;
+                    col < self.matrixBlocks[row].length;
+                    col++
+                  ) {
+                    var b = self.matrixBlocks[row][col];
+                    b.adopt(self, prev, 0);
+                    prev = b;
+                  }
+                }
+
+                self.blocks = cellBlocks;
+
+                // wire all blocks
+                for (var row = 0; row < self.matrixBlocks.length; row++) {
+                  for (
+                    var col = 0;
+                    col < self.matrixBlocks[row].length;
+                    col++
+                  ) {
+                    self.wireBlock(self.matrixBlocks[row][col]);
+                  }
+                }
+
+                return self;
+              });
+          });
+      });
   }
 }
 

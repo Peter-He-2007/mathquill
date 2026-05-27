@@ -9,3 +9,29 @@ LatexCmds.rceil = () =>
 
 LatexCmds.lvert = () => new Bracket(L, '|', '|', '\\lvert ', '\\rvert ');
 LatexCmds.rvert = () => new Bracket(R, '|', '|', '\\lvert ', '\\rvert ');
+
+function bindCharWithSpace(ch: string, latexCmd: string, display: string) {
+  return class extends MQSymbol {
+    constructor() {
+      super(ch, h('span', {}, [h.text(display)]), display);
+    }
+
+    createLeftOf(cursor: Cursor) {
+      super.createLeftOf(cursor);
+      new VanillaSymbol(
+        '\\ ',
+        h('span', {}, [h.text('\u00A0')]),
+        ' '
+      ).createLeftOf(cursor);
+    }
+
+    latex(): string {
+      return latexCmd;
+    }
+  };
+}
+
+CharCmds[','] = bindCharWithSpace(',', ',', ',');
+CharCmds[':'] = bindCharWithSpace(':', ':', ':');
+CharCmds[';'] = bindCharWithSpace(';', ';', ';');
+CharCmds['.'] = bindCharWithSpace('.', '.', '.');

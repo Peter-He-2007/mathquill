@@ -751,36 +751,6 @@ LatexCmds['″'] = LatexCmds.dprime = bindVanillaSymbol(
   'double prime'
 );
 
-// MOD START !!!
-
-function bindCharWithSpace(ch: string, latexCmd: string, display: string) {
-  return class extends MQSymbol {
-    constructor() {
-      super(ch, h('span', {}, [h.text(display)]), display);
-    }
-
-    createLeftOf(cursor: Cursor) {
-      super.createLeftOf(cursor);
-      new VanillaSymbol(
-        '\\ ',
-        h('span', {}, [h.text('\u00A0')]),
-        ' '
-      ).createLeftOf(cursor);
-    }
-
-    latex(): string {
-      return latexCmd;
-    }
-  };
-}
-
-CharCmds[','] = bindCharWithSpace(',', ',', ',');
-CharCmds[':'] = bindCharWithSpace(':', ':', ':');
-CharCmds[';'] = bindCharWithSpace(';', ';', ';');
-CharCmds['.'] = bindCharWithSpace('.', '.', '.');
-
-// MOD END !!!
-
 LatexCmds.backslash = bindVanillaSymbol('\\backslash ', '\\', 'backslash');
 if (!CharCmds['\\']) CharCmds['\\'] = LatexCmds.backslash;
 
@@ -797,8 +767,8 @@ class NonSymbolaSymbol extends MQSymbol {
 }
 
 LatexCmds['@'] = () => new NonSymbolaSymbol('@');
-LatexCmds['&'] = () =>
-  new NonSymbolaSymbol('\\&', h.entityText('&amp;'), 'and');
+// LatexCmds['&'] = () =>
+//   new NonSymbolaSymbol('\\&', h.entityText('&amp;'), 'and');
 LatexCmds['%'] = class extends NonSymbolaSymbol {
   constructor() {
     super('\\%', h.text('%'), 'percent');

@@ -677,6 +677,8 @@ class MathBlock extends MathElement {
   }
 
   writeLatex(cursor: Cursor, latex: string) {
+    latex = preprocessLatex(latex);
+
     var all = Parser.all;
     var eof = Parser.eof;
 

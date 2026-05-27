@@ -4,10 +4,17 @@ const HIDDEN_SUGGESTIONS: Set<string> = new Set([
   'left',
   'right',
   'f',
+  'begin',
+  'end',
   // add more here as needed
 ]);
 
-const BLOCKED_COMMANDS: Set<string> = new Set(['left', 'right']);
+const BLOCKED_COMMANDS: Set<string> = new Set([
+  'left',
+  'right',
+  'begin',
+  'end',
+]);
 
 function getSuggestions(partial: string): string[] {
   if (!partial) return [];
