@@ -463,23 +463,23 @@ LatexCmds.square = bindVanillaSymbol('\\square ', '&#11036;', 'square');
 //variable-sized
 // TODO: make all of these larger...
 // OG CODE LatexCmds.oint = bindVanillaSymbol('\\oint ', '&#8750;', 'o int');
-LatexCmds.bigcap = bindVanillaSymbol('\\bigcap ', '&#8745;', 'big cap');
-LatexCmds.bigcup = bindVanillaSymbol('\\bigcup ', '&#8746;', 'big cup');
-LatexCmds.bigsqcup = bindVanillaSymbol(
-  '\\bigsqcup ',
-  '&#8852;',
-  'big square cup'
-);
-LatexCmds.bigvee = bindVanillaSymbol('\\bigvee ', '&#8744;', 'big vee');
-LatexCmds.bigwedge = bindVanillaSymbol('\\bigwedge ', '&#8743;', 'big wedge');
-LatexCmds.bigodot = bindVanillaSymbol('\\bigodot ', '&#8857;', 'big o dot');
-LatexCmds.bigotimes = bindVanillaSymbol(
-  '\\bigotimes ',
-  '&#8855;',
-  'big o times'
-);
-LatexCmds.bigoplus = bindVanillaSymbol('\\bigoplus ', '&#8853;', 'big o plus');
-LatexCmds.biguplus = bindVanillaSymbol('\\biguplus ', '&#8846;', 'big u plus');
+// OG CODE LatexCmds.bigcap = bindVanillaSymbol('\\bigcap ', '&#8745;', 'big cap');
+// OG CODE LatexCmds.bigcup = bindVanillaSymbol('\\bigcup ', '&#8746;', 'big cup');
+// OG CODE LatexCmds.bigsqcup = bindVanillaSymbol(
+// OG CODE   '\\bigsqcup ',
+// OG CODE   '&#8852;',
+// OG CODE   'big square cup'
+// OG CODE );
+// OG CODE LatexCmds.bigvee = bindVanillaSymbol('\\bigvee ', '&#8744;', 'big vee');
+// OG CODE LatexCmds.bigwedge = bindVanillaSymbol('\\bigwedge ', '&#8743;', 'big wedge');
+// OG CODE LatexCmds.bigodot = bindVanillaSymbol('\\bigodot ', '&#8857;', 'big o dot');
+// OG CODE LatexCmds.bigotimes = bindVanillaSymbol(
+// OG CODE   '\\bigotimes ',
+// OG CODE   '&#8855;',
+// OG CODE   'big o times'
+// OG CODE );
+// OG CODE LatexCmds.bigoplus = bindVanillaSymbol('\\bigoplus ', '&#8853;', 'big o plus');
+// OG CODE LatexCmds.biguplus = bindVanillaSymbol('\\biguplus ', '&#8846;', 'big u plus');
 
 //delimiters
 /* Commented out origiginaln floor and ceiling !!!

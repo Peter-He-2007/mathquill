@@ -1,4 +1,4 @@
-class LimitNotation extends MathCommand {
+class TextOperator extends MathCommand {
   constructor(ch: string, symbol: string, ariaLabel?: string) {
     super();
 
@@ -26,21 +26,7 @@ class LimitNotation extends MathCommand {
     }
     return this.ctrlSeq + '_' + simplify(this.getEnd(L).latex());
   }
-  /*
-  mathspeak() {
-    return (
-      'Start ' +
-      this.ariaLabel +
-      ' from ' +
-      this.getEnd(L).mathspeak() +
-      ' to ' +
-      this.getEnd(R).mathspeak() +
-      ', end ' +
-      this.ariaLabel +
-      ', '
-    );
-  }
-  */
+
   parser() {
     var string = Parser.string;
     var optWhitespace = Parser.optWhitespace;
@@ -48,15 +34,14 @@ class LimitNotation extends MathCommand {
     var block = latexMathParser.block;
 
     var self = this;
-    var blocks = (self.blocks = [new MathBlock(), new MathBlock()]);
-    for (var i = 0; i < blocks.length; i += 1) {
-      blocks[i].adopt(self, self.getEnd(R), 0);
-    }
+    // only ONE block — matching DOMView(1, ...)
+    var blocks = (self.blocks = [new MathBlock()]);
+    blocks[0].adopt(self, self.getEnd(R), 0);
 
     return optWhitespace
-      .then(string('_').or(string('^')))
-      .then(function (supOrSub) {
-        var child = blocks[supOrSub === '_' ? 0 : 1];
+      .then(string('_')) // only parse _, not ^ since there's no upper bound
+      .then(function (_) {
+        var child = blocks[0];
         return block.then(function (block) {
           block.children().adopt(child, child.getEnd(R), 0);
           return succeed(self);
@@ -67,39 +52,34 @@ class LimitNotation extends MathCommand {
   }
   finalizeTree() {
     var endsL = this.getEnd(L);
-    var endsR = this.getEnd(R);
-
     endsL.ariaLabel = 'lower bound';
-    endsR.ariaLabel = 'upper bound';
     this.downInto = endsL;
-    this.upInto = endsR;
-    endsL.upOutOf = endsR;
-    endsR.downOutOf = endsL;
+    // no upInto since there's no upper bound block
   }
 }
 
 LatexCmds.lim = LatexCmds.limit = () =>
-  new LimitNotation('\\lim ', 'lim', 'limit');
+  new TextOperator('\\lim ', 'lim', 'limit');
 
 LatexCmds.limsup = () =>
-  new LimitNotation('\\limsup ', 'limsup', 'limit superior');
+  new TextOperator('\\limsup ', 'limsup', 'limit superior');
 
 LatexCmds.liminf = () =>
-  new LimitNotation('\\liminf ', 'liminf', 'limit inferior');
+  new TextOperator('\\liminf ', 'liminf', 'limit inferior');
 
-LatexCmds.max = () => new LimitNotation('\\max ', 'max', 'maximum');
+LatexCmds.max = () => new TextOperator('\\max ', 'max', 'maximum');
 
-LatexCmds.min = () => new LimitNotation('\\min ', 'min', 'minimum');
+LatexCmds.min = () => new TextOperator('\\min ', 'min', 'minimum');
 
-LatexCmds.sup = () => new LimitNotation('\\sup ', 'sup', 'supremum');
+LatexCmds.sup = () => new TextOperator('\\sup ', 'sup', 'supremum');
 
-LatexCmds.inf = () => new LimitNotation('\\inf ', 'inf', 'infimum');
+LatexCmds.inf = () => new TextOperator('\\inf ', 'inf', 'infimum');
 
-LatexCmds.Pr = () => new LimitNotation('\\Pr ', 'Pr', 'probability');
+LatexCmds.Pr = () => new TextOperator('\\Pr ', 'Pr', 'probability');
 
-LatexCmds.det = () => new LimitNotation('\\det ', 'det', 'determinant');
+LatexCmds.det = () => new TextOperator('\\det ', 'det', 'determinant');
 
-class ArgNotation extends LimitNotation {
+class ArgNotation extends TextOperator {
   latex(): string {
     function simplify(latex: string) {
       return '{' + (latex || ' ') + '}';
